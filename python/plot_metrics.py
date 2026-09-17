@@ -1,13 +1,20 @@
-import pandas as pd
-import matplotlib as plt
+import pandas
+import matplotlib.pyplot as plt
 
 
 def main():
-    cols = pd.read_csv('data.csv', header=None, nrows=0).columns
-    df = pd.read_csv('data.csv', header=None, usecols=cols[1:])
+    cols = pandas.read_csv('data.csv', header=None, nrows=0).columns
+    df = pandas.read_csv('data.csv', header=None, usecols=cols[1:])
 
     df_malign = df[df[df.columns[0]] == 'M']
     df_benign = df[df[df.columns[0]] == 'B']
+
+    radius_malign = df_malign.iloc[:, 1]
+    radius_benign = df_benign.iloc[:, 1]
+
+    # plt.boxplot([radius_benign, radius_malign])
+    radius_malign.hist()
+    plt.show()
 
     # minima = df.min(numeric_only=True)
     # min_idx = df.idxmin(numeric_only=True)
@@ -34,16 +41,26 @@ def main():
     mean_benign = df_benign.mean(numeric_only=True)
     std_benign = df_benign.std(numeric_only=True)
 
-    result = pd.DataFrame({
+    z_score = (df_malign - mean_malign) / std_malign
+
+    
+    z_score.iloc[:, 1].hist()
+    plt.show()
+
+    result = pandas.DataFrame({
         'mean_M': mean_malign,
         'std_M': std_malign,
         'mean_B': mean_benign,
         'std_B': std_benign
     })
-    
+
+    print(z_score)
     print(result.iloc[0])
     print()
-    print(result.iloc[6])
+    print(result.iloc[6] * 100)
+    print()
+
+    print(result.iloc[3])
 
 
 if __name__ == "__main__":
