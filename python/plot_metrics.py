@@ -8,15 +8,27 @@ def main():
 
     df[df.columns[0]] = df[df.columns[0]].replace({'M':1}, regex=True)
     df[df.columns[0]] = df[df.columns[0]].replace({'B':0}, regex=True)
-    # df = df[df[df.columns[0]]].replace({'M':'1'}, regex=True).astype(int)
-    print(df)
 
     df_train = df.iloc[:455,:]
     df_test = df.iloc[455:,:]
 
+    first_col = df_train.iloc[:, 0]
+    first_col_test = df_train.iloc[:, 0]
+
+    df_train = df_train.drop(columns=df_train.columns[0])
+    df_test = df_test.drop(columns=df_train.columns[0])
+
+    mean_train = df_train.mean()
+    std_train = df_train.std()
+
+    df_train = (df_train - mean_train) / std_train
+    df_test = (df_test - mean_train) / std_train
+
+    df_train.insert(0, first_col.name, first_col)
+    df_test.insert(0, first_col_test.name, first_col_test)
+
     df_train.to_csv('training_data.csv', index=False)
     df_test.to_csv('testing_data.csv', index=False)
-
 
     # df_malign = df[df[df.columns[0]] == 'M']
     # df_benign = df[df[df.columns[0]] == 'B']
