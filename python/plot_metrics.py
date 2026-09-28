@@ -13,10 +13,10 @@ def main():
     df_test = df.iloc[455:,:]
 
     first_col = df_train.iloc[:, 0]
-    first_col_test = df_train.iloc[:, 0]
+    first_col_test = df_test.iloc[:, 0]
 
     df_train = df_train.drop(columns=df_train.columns[0])
-    df_test = df_test.drop(columns=df_train.columns[0])
+    df_test = df_test.drop(columns=df_test.columns[0])
 
     mean_train = df_train.mean()
     std_train = df_train.std()
