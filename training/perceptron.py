@@ -5,6 +5,13 @@ import pandas
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+def softmax(x):
+    exponents = np.exp(x)
+
+    sum_of_exponents = sum(exponents)
+    probabilities = np.exp(x) / sum_of_exponents
+    return probabilities
+
 def main():
     df = pandas.read_csv('training_data.csv')
 
@@ -25,7 +32,7 @@ def main():
 
     Z1 = sigmoid(np.dot(X, W1) + B1)
     Z2 = sigmoid(np.dot(Z1, W2) + B2)
-    Z3 = sigmoid(np.dot(Z2, W3) + B3)
+    Z3 = softmax(np.dot(Z2, W3) + B3)
     print(Z3)
 
 
