@@ -2,7 +2,7 @@ import numpy as np
 import pandas
 
 
-def sigmoid( x: float ) -> float:
+def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 def main():
@@ -11,15 +11,22 @@ def main():
     first_col = df.iloc[:, 0]
     df = df.drop(columns=df.columns[0])
 
-    weights = np.array([0.05, 0.00, -0.47])
-    bias: float = 0.25
-    inputs = np.array([1.0, 2.0, 3.0])
+    X = df.to_numpy()
 
-    print(weights * inputs)
-    output = sigmoid(np.sum(weights * inputs) + bias)
-    print(output)
+    """(Number of Inputs, Number of Perceptrons)"""
+    W1 = np.random.randn(30, 15) * 0.01
+    B1 = np.zeros(15)
 
+    W2 = np.random.randn(15, 15) * 0.01
+    B2 = np.zeros(15)
 
+    W3 = np.random.randn(15, 1) * 0.01
+    B3 = np.zeros(1)
+
+    Z1 = sigmoid(np.dot(X, W1) + B1)
+    Z2 = sigmoid(np.dot(Z1, W2) + B2)
+    Z3 = sigmoid(np.dot(Z2, W3) + B3)
+    print(Z3)
 
 
 if __name__ == "__main__":
