@@ -17,15 +17,20 @@ def xavierGlorot(row: int, col: int):
     n = row * col
     lower, upper = -(1.0 / np.sqrt(n)), (1.0 / np.sqrt(n))
 
+    # np.random.seed(42)
     numbers = np.random.rand(n)
     scaled = lower + numbers * (upper - lower)
     scaled = scaled.reshape(row, col)
     return(scaled)
 
+def binary_cross_entropy(y_true, y_pred):
+    bce = -np.mean(y_true * np.log(y_pred[:, 0]) + (1 - y_true) * np.log(y_pred[:, 1]))
+    return bce
+
 def main():
     df = pandas.read_csv('training_data.csv')
 
-    first_col = df.iloc[:, 0]
+    y_true = df.iloc[:, 0]
     df = df.drop(columns=df.columns[0])
 
     X = df.to_numpy()
@@ -46,6 +51,9 @@ def main():
     # # print(Z2)
     Z3 = softmax(np.dot(Z2, W3) + B3)
     print(Z3)
+
+    loss = binary_cross_entropy(y_true, Z3)
+    print(loss)
 
 
 if __name__ == "__main__":
