@@ -27,6 +27,20 @@ def binary_cross_entropy(y_true, y_pred):
     bce = -np.mean(y_true * np.log(y_pred[:, 0]) + (1 - y_true) * np.log(y_pred[:, 1]))
     return bce
 
+
+class NeuralNetwork:
+    def __init__(self, input_size, hidden_size, output_size):
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+
+        self.weights_input_hidden = xavierGlorot(self.input_size, self.hidden_size)
+        self.weights_hidden_output = xavierGlorot(self.hidden_size, self.output_size)
+
+        self.bias_hidden = np.zeros((1, self.hidden_size))
+        self.bias_output = np.zeros((1, self.output_size))
+
+
 def main():
     df = pandas.read_csv('training_data.csv')
 
