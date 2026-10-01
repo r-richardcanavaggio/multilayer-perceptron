@@ -18,15 +18,11 @@ def main():
 
     args = parser.parse_args()
 
-    df = pandas.read_csv('training_data.csv')
+    df = pandas.read_csv('training_data.csv').to_numpy()
 
-    # y_true = df.iloc[:, 0].to_numpy()
-    # y_true_inv = 1 - y_true
-    # y_true_double = np.stack((y_true, y_true_inv), axis=1)
-
-    # df = df.drop(columns=df.columns[0])
-
-    X = df.to_numpy()
+    y = df[:, 0]
+    X = np.ascontiguousarray(df[:, 1:])
+    y_double = np.column_stack((y, 1 - y))
 
     mini_batch = args.batch_size
 
@@ -39,22 +35,27 @@ def main():
     model = NeuralNetwork(couches, learning_rate=args.learning_rate)
 
     for epoch in range(args.epochs):
+        total_loss = 0
+        num_batches = 0
+
         for first in range(0, len(X), mini_batch):
-            subset = X[first:first+mini_batch]
-            
-            y_true = subset[:, 0]
-            y_true_inv = 1 - y_true
-            y_true_double = np.stack((y_true, y_true_inv), axis=1)
+            X_batch = X[first : first + mini_batch]
+            y_batch = y[first : first + mini_batch]
+            y_double_batch = y_double[first : first + mini_batch]
 
-            subset = np.delete(subset, 0, axis=1)
+            forward_pass = model.forward(X_batch)
 
-            forward_pass = model.forward(subset)
+            loss = binary_cross_entropy(y_batch, forward_pass)
+            total_loss += loss
+            num_batches += 1
 
-            loss = binary_cross_entropy(y_true, forward_pass)
-            print(f"Epoch {epoch}: Loss = {loss}")
-
-            d_Z = forward_pass - y_true_double
+            d_Z = forward_pass - y_double_batch
             backward_pass = model.backward(d_Z)
+
+        total_loss /= num_batches
+        print(f"Epoch {epoch}: Loss = {total_loss}")
+        
+        
 
 
 if __name__ == "__main__":
