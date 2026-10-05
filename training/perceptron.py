@@ -7,9 +7,7 @@ from Math import binary_cross_entropy
 from NeuralNetwork import NeuralNetwork
 
 
-def main():
-    np.random.seed(42)
-
+def init_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--layer", type=int, nargs="+", help="Size of layers")
     parser.add_argument("--epochs", type=int, help="Number of epochs for training")
@@ -18,57 +16,82 @@ def main():
     parser.add_argument("--learning_rate", type=float, help="Floating point value of learning rate")
     parser.add_argument("--weights_initializer", type=str, default='glorot', help="Algorithm of weights initialisation. Defaults to Xavier/Glorot Init")
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    df = pandas.read_csv('training_data.csv').to_numpy()
 
-    y = df[:, 0]
-    X = np.ascontiguousarray(df[:, 1:])
-    y_double = np.column_stack((y, 1 - y))
+def init_nn(input_size: int, layers: list[int], loss_function: str, mini_batch: int, learning_rate: float) -> NeuralNetwork:
+    couches = []
+    for l in layers:
+        current_layer = DenseLayer(input_size, l, mini_batch, activation=loss_function, weights_initializer='glorot')
+        couches.append(current_layer)
+        input_size = l
+    couches.append(DenseLayer(layers[-1], 2, mini_batch, activation='softmax', weights_initializer='glorot'))
+
+    return NeuralNetwork(couches, learning_rate=learning_rate)
+
+
+def loss_plot(epochs: int, losses_train: list[float], losses_val: list[float]):
+    x = [i for i in range(epochs)]
+    plt.plot(x, losses_train, color='blue', label='training loss')
+    plt.plot(x, losses_val, color='orange', linestyle='--', label='validation loss')
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
+
+
+def main():
+    np.random.seed(42)
+
+    args = init_parser()    
+
+    training_data = pandas.read_csv('training_data.csv').to_numpy()
+    validation_data = pandas.read_csv('testing_data.csv').to_numpy()
+
+    y_train = training_data[:, 0] #First column of training_data, real output
+    y_train_double = np.column_stack((y_train, 1 - y_train)) #Output in a binary format, M = [0, 1] B = [1, 0]
+    y_val = validation_data[:, 0]
+
+    X = np.ascontiguousarray(training_data[:, 1:])
+    X_val = np.ascontiguousarray(validation_data[:, 1:])
 
     mini_batch = args.batch_size
     input_size = X.shape[1]
+    width = len(str(args.epochs))
 
-    couches = []
-    for l in args.layer:
-        current_layer = DenseLayer(input_size, l, mini_batch, activation=args.loss, weights_initializer='glorot')
-        couches.append(current_layer)
-        input_size = l
-    couches.append(DenseLayer(args.layer[-1], 2, mini_batch, activation='softmax', weights_initializer='glorot'))
+    model = init_nn(input_size, args.layer, args.loss, mini_batch, args.learning_rate)
 
-    model = NeuralNetwork(couches, learning_rate=args.learning_rate)
-
-    losses = []
+    losses_train = []
+    losses_val = []
 
     for epoch in range(args.epochs):
-        total_loss = 0
+        total_loss_train = 0
         num_batches = 0
 
         for first in range(0, len(X), mini_batch):
             X_batch = X[first : first + mini_batch]
-            y_batch = y[first : first + mini_batch]
-            y_double_batch = y_double[first : first + mini_batch]
+            y_batch = y_train[first : first + mini_batch]
+            y_double_batch = y_train_double[first : first + mini_batch]
 
             forward_pass = model.forward(X_batch)
 
             loss = binary_cross_entropy(y_batch, forward_pass)
-            total_loss += loss
+            total_loss_train += loss
             num_batches += 1
 
             d_Z = forward_pass - y_double_batch
             backward_pass = model.backward(d_Z)
 
-        total_loss /= num_batches
-        losses.append(total_loss)
-        print(f"Epoch {epoch}: Loss = {total_loss}")
+        total_loss_train /= num_batches
+        losses_train.append(total_loss_train)
 
-    x = [i for i in range(args.epochs)]
-    plt.plot(x, losses)
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.title("Training loss")
-    plt.show()
+        pred_validation = model.forward(X_val)
+        loss_val = binary_cross_entropy(y_val, pred_validation)
+        losses_val.append(loss_val)
 
+        print(f"Epoch {epoch + 1:>{width}}: Train loss = {total_loss_train:.6f} | Validation loss = {loss_val:.6f}")
+
+    loss_plot(args.epochs, losses_train, losses_val)
 
 
 if __name__ == "__main__":
