@@ -1,5 +1,5 @@
 import numpy as np
-from Math import sigmoid, softmax, glorot
+from src.Math import sigmoid, softmax, glorot
 
 
 class DenseLayer:
@@ -13,6 +13,9 @@ class DenseLayer:
         if self.weights_initializer == "glorot":
             self.weights = glorot(self.input_size, self.output_size)
         self.biases = np.zeros(self.output_size)
+
+    def __repr__(self):
+        return f"DenseLayer object: input = {self.input_size} | output = {self.output_size} | activation = {self.activation} | weights initializer = {self.weights_initializer}"
 
     def feed_forward(self, X) -> np.ndarray:
         self.X = X

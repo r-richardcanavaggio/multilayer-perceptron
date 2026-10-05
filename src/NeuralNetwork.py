@@ -2,7 +2,7 @@ import numpy as np
 
 
 class NeuralNetwork:
-    def __init__(self, layers, learning_rate):
+    def __init__(self, layers: list, learning_rate):
         self.layers = layers
         self.learning_rate = learning_rate
 
@@ -17,3 +17,11 @@ class NeuralNetwork:
         for layer in reversed(self.layers):
             out = layer.backward(out, self.learning_rate)
         return out
+
+    def export(self):
+        np.savez('model_weights.npz', *self.layers, allow_pickle=True)
+
+    @classmethod
+    def from_npz(cls, filename: str):
+        loaded_layers = np.load(filename)
+        return cls(list(loaded_layers.values()), None)

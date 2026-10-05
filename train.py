@@ -2,9 +2,9 @@ import numpy as np
 import pandas
 import argparse
 import matplotlib.pyplot as plt
-from DenseLayer import DenseLayer
-from Math import binary_cross_entropy
-from NeuralNetwork import NeuralNetwork
+from src.DenseLayer import DenseLayer
+from src.Math import binary_cross_entropy
+from src.NeuralNetwork import NeuralNetwork
 
 
 def init_parser():
@@ -45,8 +45,8 @@ def main():
 
     args = init_parser()    
 
-    training_data = pandas.read_csv('training_data.csv').to_numpy()
-    validation_data = pandas.read_csv('testing_data.csv').to_numpy()
+    training_data = pandas.read_csv('data/training_data.csv').to_numpy()
+    validation_data = pandas.read_csv('data/testing_data.csv').to_numpy()
 
     y_train = training_data[:, 0] # First column of training_data, real output
     y_train_double = np.column_stack((y_train, 1 - y_train)) # Output in a binary format, M = [1, 0] B = [0, 1]
@@ -80,7 +80,7 @@ def main():
             num_batches += 1
 
             d_Z = forward_pass - y_double_batch
-            backward_pass = model.backward(d_Z)
+            model.backward(d_Z)
 
         total_loss_train /= num_batches
         losses_train.append(total_loss_train)
@@ -92,6 +92,11 @@ def main():
         print(f"Epoch {epoch + 1:>{width}}: Train loss = {total_loss_train:.6f} | Validation loss = {loss_val:.6f}")
 
     loss_plot(args.epochs, losses_train, losses_val)
+    model.export()
+    loaded_weights = np.load('model_weights.npz', allow_pickle=True)
+    for key, value in loaded_weights.items():
+        print(f"{key}: {value}")
+
 
 
 if __name__ == "__main__":
