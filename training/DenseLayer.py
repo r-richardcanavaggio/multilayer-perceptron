@@ -1,12 +1,11 @@
 import numpy as np
-from Math import sigmoid, softmax, glorot, binary_cross_entropy
+from Math import sigmoid, softmax, glorot
 
 
 class DenseLayer:
-    def __init__(self, input_size: int, output_size: int, batch_size: int, activation: str, weights_initializer: str):
+    def __init__(self, input_size: int, output_size: int, activation: str, weights_initializer: str):
         self.input_size = input_size
         self.output_size = output_size
-        self.batch_size = batch_size
 
         self.activation = activation
         self.weights_initializer = weights_initializer
@@ -32,8 +31,8 @@ class DenseLayer:
         elif self.activation == "softmax":
             d_Z = d_Z_next
 
-        d_weights = np.dot(self.X.transpose(), d_Z) / self.batch_size
-        d_biases = d_Z.sum(axis=0) / self.batch_size
+        d_weights = np.dot(self.X.transpose(), d_Z) / self.X.shape[0]
+        d_biases = d_Z.sum(axis=0) / self.X.shape[0]
 
         d_Prev = np.dot(d_Z, self.weights.transpose())
 

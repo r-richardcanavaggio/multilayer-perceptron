@@ -22,10 +22,10 @@ def init_parser():
 def init_nn(input_size: int, layers: list[int], loss_function: str, mini_batch: int, learning_rate: float) -> NeuralNetwork:
     couches = []
     for l in layers:
-        current_layer = DenseLayer(input_size, l, mini_batch, activation=loss_function, weights_initializer='glorot')
+        current_layer = DenseLayer(input_size, l, activation=loss_function, weights_initializer='glorot')
         couches.append(current_layer)
         input_size = l
-    couches.append(DenseLayer(layers[-1], 2, mini_batch, activation='softmax', weights_initializer='glorot'))
+    couches.append(DenseLayer(layers[-1], 2, activation='softmax', weights_initializer='glorot'))
 
     return NeuralNetwork(couches, learning_rate=learning_rate)
 
@@ -48,8 +48,8 @@ def main():
     training_data = pandas.read_csv('training_data.csv').to_numpy()
     validation_data = pandas.read_csv('testing_data.csv').to_numpy()
 
-    y_train = training_data[:, 0] #First column of training_data, real output
-    y_train_double = np.column_stack((y_train, 1 - y_train)) #Output in a binary format, M = [0, 1] B = [1, 0]
+    y_train = training_data[:, 0] # First column of training_data, real output
+    y_train_double = np.column_stack((y_train, 1 - y_train)) # Output in a binary format, M = [1, 0] B = [0, 1]
     y_val = validation_data[:, 0]
 
     X = np.ascontiguousarray(training_data[:, 1:])
