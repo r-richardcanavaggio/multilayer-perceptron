@@ -43,3 +43,10 @@ class DenseLayer:
         self.biases = self.biases - (learning_rate * d_biases)
 
         return d_Prev
+
+    @classmethod
+    def from_computed(cls, weights: np.ndarray, biases: np.ndarray, activation: str) -> DenseLayer:
+        instance = cls(0, 0, activation, '')
+        instance.weights = weights
+        instance.biases = biases
+        return instance

@@ -1,4 +1,5 @@
 import numpy as np
+from src.DenseLayer import DenseLayer
 
 
 class NeuralNetwork:
@@ -30,9 +31,13 @@ class NeuralNetwork:
 
     @classmethod
     def from_npz(cls, filename: str):
-        loaded_layers = np.load(filename, allow_pickle=True)
+        loaded_layers = np.load(filename)
+
         layers = []
-        for key, value in loaded_layers.items():
-            print(value.item())
-        # print(layers)
+        for i in range(len(loaded_layers) // 3):
+            weights = loaded_layers[f"W_{i}"]
+            biases = loaded_layers[f"b_{i}"]
+            activation = loaded_layers[f"A_{i}"]
+            layer = DenseLayer.from_computed(weights, biases, activation)
+            layers.append(layer)
         return cls(layers, None)
