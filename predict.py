@@ -13,6 +13,10 @@ def main():
     X = np.ascontiguousarray(data[:, 1:])
 
     raw_prediction = model.forward(X)
+    loss = binary_cross_entropy(y, raw_prediction)
+
+    print(f"Binary cross-entropy loss: {loss}")
+
     raw_prediction[:, [0, 1]] = raw_prediction[:, [1, 0]]
     prediction = np.argmax(raw_prediction, axis=1)
 
