@@ -21,9 +21,11 @@ def glorot(row: int, col: int):
     numbers = np.random.rand(n)
     scaled = lower + numbers * (upper - lower)
     scaled = scaled.reshape(row, col)
-    return(scaled)
+    return scaled
 
 
-def binary_cross_entropy(y_true, y_pred):
-    bce = -np.mean(y_true * np.log(y_pred[:, 0]) + (1 - y_true) * np.log(y_pred[:, 1]))
+def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray):
+    bce = -np.mean(
+        y_true * np.log(y_pred[:, 0]) + (1 - y_true) * np.log(y_pred[:, 1])
+    )
     return bce

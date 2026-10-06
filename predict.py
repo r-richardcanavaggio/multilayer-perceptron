@@ -15,7 +15,7 @@ def main():
     raw_prediction = model.forward(X)
     loss = binary_cross_entropy(y, raw_prediction)
 
-    print(f"Binary cross-entropy loss: {loss}")
+    print(f"Binary cross-entropy loss: {loss}\n")
 
     raw_prediction[:, [0, 1]] = raw_prediction[:, [1, 0]]
     prediction = np.argmax(raw_prediction, axis=1)
@@ -33,8 +33,15 @@ def main():
             false_negative += 1
         elif y_true == 0 and y_pred == 0:
             true_negative += 1
-    error_matrix = np.array([[true_positive, false_negative], [false_positive, true_negative]])
+    row_names = ['Actual Positives', 'Actual Negatives']
+    col_names = ['Predicted Positives', 'Predicted Negatives']
+    error_matrix = np.array([[true_positive, false_negative],
+                             [false_positive, true_negative]])
+    error_df = pandas.DataFrame(error_matrix,
+                                index=row_names, columns=col_names)
 
+    print(error_df)
+    print()
     accuracy = (true_positive + true_negative) / n
     precision = true_positive / (true_positive + false_positive)
     recall = true_positive / (true_positive + false_negative)
@@ -43,8 +50,6 @@ def main():
           f"Precision: {precision * 100:.2f}%\n"
           f"Recall: {recall * 100:.2f}%\n"
           f"F1 Score: {f1_score * 100:.2f}%")
-
-    
 
 
 if __name__ == "__main__":

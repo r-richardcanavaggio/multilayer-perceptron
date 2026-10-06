@@ -3,7 +3,9 @@ from src.Math import sigmoid, softmax, glorot
 
 
 class DenseLayer:
-    def __init__(self, input_size: int, output_size: int, activation: str, weights_initializer: str):
+    def __init__(self, input_size: int,
+                 output_size: int, activation: str,
+                 weights_initializer: str):
         self.input_size = input_size
         self.output_size = output_size
 
@@ -15,7 +17,10 @@ class DenseLayer:
         self.biases = np.zeros(self.output_size)
 
     def __repr__(self):
-        return f"DenseLayer object: input = {self.input_size} | output = {self.output_size} | activation = {self.activation} | weights initializer = {self.weights_initializer}"
+        return (f"DenseLayer object: input = {self.input_size}"
+                f" | output = {self.output_size}"
+                f" | activation = {self.activation}"
+                f" | weights initializer = {self.weights_initializer}")
 
     def feed_forward(self, X) -> np.ndarray:
         self.X = X
@@ -45,7 +50,8 @@ class DenseLayer:
         return d_Prev
 
     @classmethod
-    def from_computed(cls, weights: np.ndarray, biases: np.ndarray, activation: str) -> DenseLayer:
+    def from_computed(cls, weights: np.ndarray,
+                      biases: np.ndarray, activation: str) -> DenseLayer:
         instance = cls(0, 0, activation, '')
         instance.weights = weights
         instance.biases = biases
