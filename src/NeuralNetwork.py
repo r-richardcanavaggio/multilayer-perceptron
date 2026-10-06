@@ -19,9 +19,20 @@ class NeuralNetwork:
         return out
 
     def export(self):
-        np.savez('model_weights.npz', *self.layers, allow_pickle=True)
+        nn_dict = {}
+        for i, layer in enumerate(self.layers):
+            nn_dict[f"W_{i}"] = layer.weights
+            nn_dict[f"b_{i}"] = layer.biases
+            nn_dict[f"A_{i}"] = layer.activation
+
+        print(f"ss{nn_dict}")
+        np.savez('data/model_weights.npz', **nn_dict)
 
     @classmethod
     def from_npz(cls, filename: str):
-        loaded_layers = np.load(filename)
-        return cls(list(loaded_layers.values()), None)
+        loaded_layers = np.load(filename, allow_pickle=True)
+        layers = []
+        for key, value in loaded_layers.items():
+            print(value.item())
+        # print(layers)
+        return cls(layers, None)

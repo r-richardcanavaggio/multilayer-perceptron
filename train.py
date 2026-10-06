@@ -12,7 +12,7 @@ def init_parser():
     parser.add_argument("--layer", type=int, nargs="+", help="Size of layers")
     parser.add_argument("--epochs", type=int, help="Number of epochs for training")
     parser.add_argument("--loss", type=str, default='sigmoid', help="Error function to use during training")
-    parser.add_argument("--batch_size", type=int, help="Size of input data to use")
+    parser.add_argument("--batch_size", type=int, default=8, help="Size of input data to use")
     parser.add_argument("--learning_rate", type=float, help="Floating point value of learning rate")
     parser.add_argument("--weights_initializer", type=str, default='glorot', help="Algorithm of weights initialisation. Defaults to Xavier/Glorot Init")
 
@@ -93,9 +93,8 @@ def main():
 
     loss_plot(args.epochs, losses_train, losses_val)
     model.export()
-    loaded_weights = np.load('model_weights.npz', allow_pickle=True)
-    for key, value in loaded_weights.items():
-        print(f"{key}: {value}")
+    loaded_weights = np.load('data/model_weights.npz', allow_pickle=True)
+
 
 
 

@@ -6,7 +6,8 @@ import pandas
 
 def main():
     data = pandas.read_csv('data/testing_data.csv').to_numpy()
-    model = NeuralNetwork.from_npz('model_weights.npz')
+    model = NeuralNetwork.from_npz('data/model_weights.npz')
+    print(type(model))
 
     y = data[:, 0]
     X = np.ascontiguousarray(data[:, 1:])
