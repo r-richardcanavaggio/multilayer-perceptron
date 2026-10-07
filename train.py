@@ -45,7 +45,7 @@ def init_parser():
 
 
 def init_nn(input_size: int, layers_sizes: list[int],
-            loss_function: str, mini_batch: int,
+            loss_function: str,
             learning_rate: float) -> NeuralNetwork:
     layers = []
 
@@ -57,7 +57,7 @@ def init_nn(input_size: int, layers_sizes: list[int],
         layers.append(new_layer)
         input_size = layer
     layers.append(DenseLayer(
-        layers[-1], 2, activation='softmax',
+        layers_sizes[-1], 2, activation='softmax',
         weights_initializer='glorot'
     ))
 
@@ -74,6 +74,24 @@ def loss_plot(epochs: int, losses_train: list[float], losses_val: list[float]):
     plt.ylabel("Loss")
     plt.legend()
     plt.show()
+
+def accuracy_plot(epochs: int, accuracy_train: list[float], accuracy_val: list[float]):
+    x = [i for i in range(epochs)]
+    plt.plot(x, accuracy_train, color='blue', label='training loss')
+    plt.plot(x, accuracy_val,
+                color='orange', linestyle='--',
+                label='validation loss')
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.show()
+
+
+def compute_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    raw_predict = y_pred.copy()
+    raw_predict[:, [0, 1]] = raw_predict[:, [1, 0]]
+    prediction = np.argmax(raw_predict, axis=1)
+    return (y_true == prediction).sum() / y_pred.shape[0]
 
 
 def main():
@@ -97,14 +115,17 @@ def main():
     input_size = X.shape[1]
     width = len(str(args.epochs))
 
-    model = init_nn(input_size, args.layer,
-                    args.loss, mini_batch, args.learning_rate)
+    model = init_nn(input_size, args.layers,
+                    args.loss, args.learning_rate)
 
     losses_train = []
     losses_val = []
+    accuracies_train = []
+    accuracies_val = []
 
     for epoch in range(args.epochs):
         total_loss_train = 0
+        total_accuracy_train = 0.
         num_batches = 0
 
         for first in range(0, len(X), mini_batch):
@@ -116,23 +137,34 @@ def main():
 
             loss = binary_cross_entropy(y_batch, forward_pass)
             total_loss_train += loss
+
+            accuracy = compute_accuracy(y_batch, forward_pass)
+            total_accuracy_train += accuracy
+
             num_batches += 1
 
             d_Z = forward_pass - y_double_batch
             model.backward(d_Z)
 
         total_loss_train /= num_batches
+        total_accuracy_train /= num_batches
         losses_train.append(total_loss_train)
+        accuracies_train.append(total_accuracy_train)
 
         pred_validation = model.forward(X_val)
+
         loss_val = binary_cross_entropy(y_val, pred_validation)
         losses_val.append(loss_val)
 
-        print(f"Epoch {epoch + 1:>{width}}:"
-              f"Train loss = {total_loss_train:.6f}"
-              f" | Validation loss = {loss_val:.6f}")
+        accuracy_val = compute_accuracy(y_val, pred_validation)
+        accuracies_val.append(accuracy_val)
+
+        print(f"Epoch {epoch + 1:>{width}}: "
+              f"Train loss = {total_loss_train:.6f} | "
+              f"Validation loss = {loss_val:.6f}")
 
     loss_plot(args.epochs, losses_train, losses_val)
+    accuracy_plot(args.epochs, accuracies_train, accuracies_val)
     model.export()
 
 

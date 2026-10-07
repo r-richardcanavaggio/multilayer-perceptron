@@ -26,7 +26,6 @@ class NeuralNetwork:
             nn_dict[f"b_{i}"] = layer.biases
             nn_dict[f"A_{i}"] = layer.activation
 
-        print(f"ss{nn_dict}")
         np.savez('data/model_weights.npz', **nn_dict)
 
     @classmethod
