@@ -7,7 +7,7 @@ from src.Math import binary_cross_entropy
 from src.NeuralNetwork import NeuralNetwork
 
 
-def init_parser():
+def init_parser() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -44,9 +44,11 @@ def init_parser():
     return parser.parse_args()
 
 
-def init_nn(input_size: int, layers_sizes: list[int],
-            loss_function: str,
-            learning_rate: float) -> NeuralNetwork:
+def init_nn(
+        input_size: int, layers_sizes: list[int],
+        loss_function: str,
+        learning_rate: float
+        ) -> NeuralNetwork:
     layers = []
 
     for layer in layers_sizes:
@@ -75,12 +77,17 @@ def loss_plot(epochs: int, losses_train: list[float], losses_val: list[float]):
     plt.legend()
     plt.show()
 
-def accuracy_plot(epochs: int, accuracy_train: list[float], accuracy_val: list[float]):
+
+def accuracy_plot(
+        epochs: int, accuracy_train: list[float],
+        accuracy_val: list[float]
+        ) -> None:
     x = [i for i in range(epochs)]
     plt.plot(x, accuracy_train, color='blue', label='training loss')
     plt.plot(x, accuracy_val,
-                color='orange', linestyle='--',
-                label='validation loss')
+             color='orange', linestyle='--',
+             label='validation loss'
+             )
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
