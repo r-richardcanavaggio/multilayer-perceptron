@@ -130,7 +130,7 @@ def main():
     width = len(str(args.epochs))
 
     model = init_nn(input_size, args.layers,
-                    args.loss, args.learning_rate, args.optimizer)
+                    args.activation, args.learning_rate, args.optimizer)
 
     losses_train = []
     losses_val = []
