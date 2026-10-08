@@ -14,7 +14,7 @@ def softmax(x):
     return probabilities
 
 
-def glorot(row: int, col: int):
+def glorot(row: int, col: int) -> np.ndarray:
     n = row * col
     lower, upper = -(1.0 / np.sqrt(n)), (1.0 / np.sqrt(n))
 
@@ -24,8 +24,14 @@ def glorot(row: int, col: int):
     return scaled
 
 
-def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray):
+def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     bce = -np.mean(
         y_true * np.log(y_pred[:, 1]) + (1 - y_true) * np.log(y_pred[:, 0])
     )
     return bce
+
+
+def compute_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    raw_predict = y_pred.copy()
+    prediction = np.argmax(raw_predict, axis=1)
+    return (y_true == prediction).sum() / y_pred.shape[0]
