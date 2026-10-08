@@ -26,6 +26,6 @@ def glorot(row: int, col: int):
 
 def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray):
     bce = -np.mean(
-        y_true * np.log(y_pred[:, 0]) + (1 - y_true) * np.log(y_pred[:, 1])
+        y_true * np.log(y_pred[:, 1]) + (1 - y_true) * np.log(y_pred[:, 0])
     )
     return bce

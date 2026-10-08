@@ -17,7 +17,7 @@ def main():
 
     print(f"Binary cross-entropy loss: {loss}\n")
 
-    raw_prediction[:, [0, 1]] = raw_prediction[:, [1, 0]]
+    # raw_prediction[:, [0, 1]] = raw_prediction[:, [1, 0]]
     prediction = np.argmax(raw_prediction, axis=1)
 
     true_positive = 0

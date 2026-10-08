@@ -5,16 +5,25 @@ from src.Math import sigmoid, softmax, glorot
 class DenseLayer:
     def __init__(self, input_size: int,
                  output_size: int, activation: str,
-                 weights_initializer: str):
+                 weights_initializer: str, optimizer: str):
         self.input_size = input_size
         self.output_size = output_size
 
         self.activation = activation
         self.weights_initializer = weights_initializer
+        self.optimizer = optimizer
 
         if self.weights_initializer == "glorot":
             self.weights = glorot(self.input_size, self.output_size)
         self.biases = np.zeros(self.output_size)
+
+        if self.optimizer == 'Adam':
+            self.m_w = np.zeros_like(self.weights)
+            self.m_b = np.zeros_like(self.biases)
+            self.v_w = np.zeros_like(self.weights)
+            self.v_b = np.zeros_like(self.biases)
+            self.t = 1
+            self.eps = 1e-8
 
     def __repr__(self):
         return (f"DenseLayer object: input = {self.input_size}"
@@ -44,15 +53,34 @@ class DenseLayer:
 
         d_Prev = np.dot(d_Z, self.weights.transpose())
 
-        self.weights = self.weights - (learning_rate * d_weights)
-        self.biases = self.biases - (learning_rate * d_biases)
+        if self.optimizer == 'SGD':
+            self.weights = self.weights - (learning_rate * d_weights)
+            self.biases = self.biases - (learning_rate * d_biases)
+        elif self.optimizer == 'Adam':
+            self.m_w = 0.9 * self.m_w + 0.1 * d_weights
+            self.v_w = 0.999 * self.v_w + 0.001 * (d_weights ** 2)
+
+            self.m_b = 0.9 * self.m_b + 0.1 * d_biases
+            self.v_b = 0.999 * self.v_b + 0.001 * (d_biases ** 2)
+
+            m_hat_w = self.m_w / (1 - 0.9 ** self.t)
+            v_hat_w = self.v_w / (1 - 0.999 ** self.t)
+
+            m_hat_b = self.m_b / (1 - 0.9 ** self.t)
+            v_hat_b = self.v_b / (1 - 0.999 ** self.t)
+
+            self.t += 1
+            self.weights -= (learning_rate *
+                             (m_hat_w / (np.sqrt(v_hat_w) + self.eps)))
+            self.biases -= (learning_rate *
+                            (m_hat_b / (np.sqrt(v_hat_b) + self.eps)))
 
         return d_Prev
 
     @classmethod
     def from_computed(cls, weights: np.ndarray,
                       biases: np.ndarray, activation: str) -> DenseLayer:
-        instance = cls(0, 0, activation, '')
+        instance = cls(0, 0, activation, '', '')
         instance.weights = weights
         instance.biases = biases
         return instance

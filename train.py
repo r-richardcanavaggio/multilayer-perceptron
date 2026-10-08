@@ -21,7 +21,7 @@ def init_parser() -> argparse.Namespace:
         help="Number of epochs for training"
     )
     parser.add_argument(
-        "-L", "--loss",
+        "-a", "--activation",
         type=str, default='sigmoid',
         help="Error function to use during training"
     )
@@ -40,6 +40,12 @@ def init_parser() -> argparse.Namespace:
         type=str, default='glorot',
         help="Weights initialisation. Defaults to Xavier/Glorot Init"
     )
+    parser.add_argument(
+        "-o", "--optimizer",
+        type=str, default='SGD', choices=['SGD', 'Adam'],
+        help="Optimizer algorithm during backpropagation."
+        "Defaults to Stochastic Gradient Descent"
+    )
 
     return parser.parse_args()
 
@@ -47,20 +53,21 @@ def init_parser() -> argparse.Namespace:
 def init_nn(
         input_size: int, layers_sizes: list[int],
         loss_function: str,
-        learning_rate: float
+        learning_rate: float,
+        optimizer: str
         ) -> NeuralNetwork:
     layers = []
 
     for layer in layers_sizes:
         new_layer = DenseLayer(
             input_size, layer, activation=loss_function,
-            weights_initializer='glorot'
+            weights_initializer='glorot', optimizer=optimizer
         )
         layers.append(new_layer)
         input_size = layer
     layers.append(DenseLayer(
         layers_sizes[-1], 2, activation='softmax',
-        weights_initializer='glorot'
+        weights_initializer='glorot', optimizer=optimizer
     ))
 
     return NeuralNetwork(layers, learning_rate=learning_rate)
@@ -83,20 +90,20 @@ def accuracy_plot(
         accuracy_val: list[float]
         ) -> None:
     x = [i for i in range(epochs)]
-    plt.plot(x, accuracy_train, color='blue', label='training loss')
+    plt.plot(x, accuracy_train, color='blue', label='training accuracy')
     plt.plot(x, accuracy_val,
              color='orange', linestyle='--',
-             label='validation loss'
+             label='validation accuracy'
              )
     plt.xlabel("Epochs")
-    plt.ylabel("Loss")
+    plt.ylabel("Accuracy")
     plt.legend()
     plt.show()
 
 
 def compute_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     raw_predict = y_pred.copy()
-    raw_predict[:, [0, 1]] = raw_predict[:, [1, 0]]
+    # raw_predict[:, [0, 1]] = raw_predict[:, [1, 0]]
     prediction = np.argmax(raw_predict, axis=1)
     return (y_true == prediction).sum() / y_pred.shape[0]
 
@@ -111,8 +118,8 @@ def main():
 
     # First column of training_data, real output
     y_train = training_data[:, 0]
-    # Output in a binary format, M = [1, 0] B = [0, 1]
-    y_train_double = np.column_stack((y_train, 1 - y_train))
+    # Output in a binary format, M = [0, 1] B = [1, 0]
+    y_train_double = np.column_stack((1 - y_train, y_train))
     y_val = validation_data[:, 0]
 
     X = np.ascontiguousarray(training_data[:, 1:])
@@ -123,7 +130,7 @@ def main():
     width = len(str(args.epochs))
 
     model = init_nn(input_size, args.layers,
-                    args.loss, args.learning_rate)
+                    args.loss, args.learning_rate, args.optimizer)
 
     losses_train = []
     losses_val = []
