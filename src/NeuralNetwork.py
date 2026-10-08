@@ -4,9 +4,23 @@ from src.Math import binary_cross_entropy, compute_accuracy
 
 
 class NeuralNetwork:
-    def __init__(self, layers: list, learning_rate):
-        self.layers = layers
+    def __init__(self, input_size: int,
+                 layers_sizes: list[int], learning_rate: float,
+                 activation: str, optimizer: str):
         self.learning_rate = learning_rate
+        self.layers = []
+
+        for layer in layers_sizes:
+            new_layer = DenseLayer(
+                input_size, layer, activation=activation,
+                weights_initializer='glorot', optimizer=optimizer
+            )
+            self.layers.append(new_layer)
+            input_size = layer
+        self.layers.append(DenseLayer(
+            layers_sizes[-1], 2, activation='softmax',
+            weights_initializer='glorot', optimizer=optimizer
+        ))
 
     def forward(self, X):
         out = X
@@ -95,26 +109,3 @@ class NeuralNetwork:
             layer = DenseLayer.from_computed(weights, biases, activation)
             layers.append(layer)
         return cls(layers, None)
-
-
-def init_nn(
-        input_size: int, layers_sizes: list[int],
-        loss_function: str,
-        learning_rate: float,
-        optimizer: str
-        ) -> NeuralNetwork:
-    layers = []
-
-    for layer in layers_sizes:
-        new_layer = DenseLayer(
-            input_size, layer, activation=loss_function,
-            weights_initializer='glorot', optimizer=optimizer
-        )
-        layers.append(new_layer)
-        input_size = layer
-    layers.append(DenseLayer(
-        layers_sizes[-1], 2, activation='softmax',
-        weights_initializer='glorot', optimizer=optimizer
-    ))
-
-    return NeuralNetwork(layers, learning_rate=learning_rate)
