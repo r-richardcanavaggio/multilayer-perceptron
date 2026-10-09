@@ -34,14 +34,23 @@ class NeuralNetwork:
             out = layer.backward(out, self.learning_rate)
         return out
 
-    def export(self):
+    def export(self, path: str):
         nn_dict = {}
         for i, layer in enumerate(self.layers):
             nn_dict[f"W_{i}"] = layer.weights
             nn_dict[f"b_{i}"] = layer.biases
             nn_dict[f"A_{i}"] = layer.activation
 
-        np.savez('data/model_weights.npz', **nn_dict)
+        try:
+            np.savez(path, **nn_dict)
+        except PermissionError as error:
+            print(error)
+        except OSError as error:
+            print(error)
+        except ValueError as error:
+            print(error)
+        else:
+            print(f"Model saved succesfully in {path}")
 
     def fit(self,
             X: np.ndarray, y: np.ndarray,
@@ -55,6 +64,10 @@ class NeuralNetwork:
                    'val_acc': []}
 
         width = len(str(epochs))
+
+        PATIENCE = 10
+        best_val_loss = 0
+        count_loss = 0
 
         for epoch in range(epochs):
             total_loss_train = 0
@@ -91,6 +104,18 @@ class NeuralNetwork:
 
             accuracy_val = compute_accuracy(y_val, pred_validation)
             history['val_acc'].append(accuracy_val)
+
+            if epoch == 1:
+                best_val_loss = loss_val
+
+            if loss_val < best_val_loss:
+                count_loss = 0
+                best_val_loss = loss_val
+            else:
+                count_loss += 1
+
+            if count_loss == PATIENCE:
+                return history
 
             print(f"Epoch {epoch + 1:>{width}}: "
                   f"Train loss = {total_loss_train:.8f} | "
