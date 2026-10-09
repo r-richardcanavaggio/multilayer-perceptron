@@ -1,31 +1,8 @@
 import numpy as np
-import pandas
-import sys
 from src.parser import init_parser
 from src.plot import accuracy_plot, loss_plot
 from src.NeuralNetwork import NeuralNetwork
-
-
-def ft_load(path: str) -> pandas.DataFrame:
-    try:
-        df = pandas.read_csv(path)
-        print(f"Successfully loaded data in {path}")
-        return df
-    except FileNotFoundError:
-        print(f"FileNotFoundError: {path}")
-        sys.exit()
-    except PermissionError:
-        print(f"PermissionError: denied {path}")
-        sys.exit()
-    except pandas.errors.ParserError:
-        print(f"Error: Data Parsing Error. Data might be corrupted in {path}")
-        sys.exit()
-    except UnicodeDecodeError:
-        print(f"UnicodeDecodeError: File could not be decoded at {path}")
-        sys.exit()
-    except Exception as e:
-        print(f"Unexepected error while reading file {e}")
-        sys.exit()
+from src.ft_load import ft_load
 
 
 def load_data(train_path: str, val_path: str):
@@ -63,8 +40,9 @@ def main():
     history = model.fit(
         X, y, y_double,
         X_val, y_val,
-        args.epochs, args.batch_size
-        )
+        args.epochs, args.batch_size,
+        args.stop_early
+    )
 
     loss_plot(len(history['loss']), history['loss'], history['val_loss'])
     accuracy_plot(len(history['acc']), history['acc'], history['val_acc'])

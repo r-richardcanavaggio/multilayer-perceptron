@@ -56,7 +56,8 @@ class NeuralNetwork:
             X: np.ndarray, y: np.ndarray,
             y_double: np.ndarray, X_val: np.ndarray,
             y_val: np.ndarray,
-            epochs: int, batch_size: int
+            epochs: int, batch_size: int,
+            stop_early: int
             ) -> dict:
         history = {'loss': [],
                    'val_loss': [],
@@ -65,9 +66,10 @@ class NeuralNetwork:
 
         width = len(str(epochs))
 
-        PATIENCE = 10
-        best_val_loss = 0
-        count_loss = 0
+        if stop_early:
+            PATIENCE = stop_early
+            best_val_loss = 0
+            count_loss = 0
 
         for epoch in range(epochs):
             total_loss_train = 0
@@ -105,17 +107,18 @@ class NeuralNetwork:
             accuracy_val = compute_accuracy(y_val, pred_validation)
             history['val_acc'].append(accuracy_val)
 
-            if epoch == 1:
-                best_val_loss = loss_val
+            if stop_early:
+                if epoch == 1:
+                    best_val_loss = loss_val
 
-            if loss_val < best_val_loss:
-                count_loss = 0
-                best_val_loss = loss_val
-            else:
-                count_loss += 1
+                if loss_val < best_val_loss:
+                    count_loss = 0
+                    best_val_loss = loss_val
+                else:
+                    count_loss += 1
 
-            if count_loss == PATIENCE:
-                return history
+                if count_loss == PATIENCE:
+                    return history
 
             print(f"Epoch {epoch + 1:>{width}}: "
                   f"Train loss = {total_loss_train:.8f} | "

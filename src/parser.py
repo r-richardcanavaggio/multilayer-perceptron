@@ -40,5 +40,11 @@ def init_parser() -> argparse.Namespace:
         help="Optimizer algorithm during backpropagation."
         "Defaults to Stochastic Gradient Descent"
     )
+    parser.add_argument(
+        "-s", "--stop_early",
+        nargs='?', type=int, const=10, default=False,
+        help="Training will stop after N number of epochs"
+        "where validation stopped diminishing. Defaults to 10."
+    )
 
     return parser.parse_args()
