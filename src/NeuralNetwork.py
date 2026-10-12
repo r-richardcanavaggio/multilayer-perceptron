@@ -137,3 +137,7 @@ class NeuralNetwork:
             layer = DenseLayer.from_computed(weights, biases, activation)
             layers.append(layer)
         return cls(layers, None)
+
+    def get_weights_vector(self) -> np.ndarray:
+        flattened_weights = [layers.flatten() for layers in self.layers]
+        return np.concatenate(flattened_weights)

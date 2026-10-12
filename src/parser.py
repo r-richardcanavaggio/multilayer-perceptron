@@ -44,7 +44,9 @@ def init_parser() -> argparse.Namespace:
         "-s", "--stop_early",
         nargs='?', type=int, const=10, default=False,
         help="Training will stop after N number of epochs"
-        "where validation stopped diminishing. Defaults to 10."
+        "where validation stopped diminishing."
+        "Inactive by default. If flag is present,"
+        "defaults to 10."
     )
 
     return parser.parse_args()
