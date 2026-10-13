@@ -5,6 +5,7 @@ from src.NeuralNetwork import NeuralNetwork
 from src.ft_load import ft_load
 from src.Math import binary_cross_entropy
 import matplotlib.pyplot as plt
+import pandas
 
 def load_data(train_path: str, val_path: str):
     training_data = ft_load(train_path).to_numpy()
@@ -90,6 +91,7 @@ def main():
     loss_plot(history['total_epoch'], history['loss'], history['val_loss'])
     accuracy_plot(history['total_epoch'], history['acc'], history['val_acc'])
     model.export('data/model_weights.npz')
+    pandas.DataFrame(history).to_csv('history.csv')
 
 
 if __name__ == "__main__":
