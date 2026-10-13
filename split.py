@@ -4,9 +4,9 @@ import pandas
 def main():
     cols = pandas.read_csv('data/data.csv', header=None, nrows=0).columns
     df = pandas.read_csv('data/data.csv', header=None, usecols=cols[1:])
-
-    df[df.columns[0]] = df[df.columns[0]].replace({'M': 1}, regex=True)
-    df[df.columns[0]] = df[df.columns[0]].replace({'B': 0}, regex=True)
+    
+    df[df.columns[0]] = df[df.columns[0]].replace({'M': 1})
+    df[df.columns[0]] = df[df.columns[0]].replace({'B': 0})
 
     df_train = df.iloc[:455, :]
     df_test = df.iloc[455:, :]
