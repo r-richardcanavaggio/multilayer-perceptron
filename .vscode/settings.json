@@ -1,5 +1,7 @@
 {
     "terminal.integrated.fontFamily": "'Inconsolata Nerd Font'",
     "terminal.integrated.fontSize": 14,
-    "terminal.integrated.fontLigatures.enabled": true
+    "terminal.integrated.fontLigatures.enabled": true,
+    "python.languageServer": "Pylance",
+    "python.analysis.typeCheckingMode": "strict", 
 }

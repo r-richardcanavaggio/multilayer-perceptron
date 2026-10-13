@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from src.parser import init_parser
 from src.plot import accuracy_plot, loss_plot
 from src.NeuralNetwork import NeuralNetwork
@@ -7,27 +8,26 @@ from src.Math import binary_cross_entropy
 import matplotlib.pyplot as plt
 import pandas
 
+
 def load_data(train_path: str, val_path: str):
     training_data = ft_load(train_path).to_numpy()
     validation_data = ft_load(val_path).to_numpy()
 
     # First column of training_data, real output
     y_train = training_data[:, 0]
-    # Output in a binary format, M = [0, 1] B = [1, 0]
-    y_train_double = np.column_stack((1 - y_train, y_train))
     y_val = validation_data[:, 0]
 
     X_train = np.ascontiguousarray(training_data[:, 1:])
     X_val = np.ascontiguousarray(validation_data[:, 1:])
 
-    return X_train, y_train, y_train_double, X_val, y_val
+    return X_train, y_train, X_val, y_val
 
 
 def main():
     np.random.seed(42)
 
     args = init_parser()
-    X, y, y_double, X_val, y_val = load_data(
+    X, y, X_val, y_val = load_data(
         'data/training_data.csv', 'data/testing_data.csv'
         )
 
@@ -40,7 +40,7 @@ def main():
     )
 
     history = model.fit(
-        X, y, y_double,
+        X, y,
         X_val, y_val,
         args.epochs, args.batch_size,
         args.stop_early
@@ -57,15 +57,17 @@ def main():
     y_traj = np.dot(A, d2)
     z_traj = history['loss']
 
-    u_vals = np.linspace(x_traj.min() - 0.5, x_traj.max() + 0.5, 30)
-    v_vals = np.linspace(y_traj.min() - 0.5, y_traj.max() + 0.5, 30)
-    U, V = np.meshgrid(u_vals, v_vals)
+    u_vals: NDArray[np.float64] = np.linspace(x_traj.min() - 0.5, x_traj.max() + 0.5, 30, dtype=np.float64)
+    v_vals: NDArray[np.float64] = np.linspace(y_traj.min() - 0.5, y_traj.max() + 0.5, 30, dtype=np.float64)
+
+    u_matrix, v_matrix = np.meshgrid(u_vals, v_vals)
+
     Z = np.zeros((30, 30))
 
     for i in range(30):
         for j in range(30):
-            u = U[i, j]
-            v = V[i, j]
+            u = u_matrix[i, j]
+            v = v_matrix[i, j]
 
             theta = theta_final + (u * d1) + (v * d2)
             model.set_weights_vector(theta)
@@ -76,7 +78,7 @@ def main():
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.plot_surface(U, V, Z, cmap='coolwarm', alpha=0.7)
+    ax.plot_surface(u_matrix, v_matrix, Z, cmap='coolwarm', alpha=0.7)
 
     ax.plot(x_traj, y_traj, z_traj, color='black', marker='o', markersize=4)
 
@@ -86,8 +88,6 @@ def main():
 
     plt.show()
 
-
-    
     loss_plot(history['total_epoch'], history['loss'], history['val_loss'])
     accuracy_plot(history['total_epoch'], history['acc'], history['val_acc'])
     model.export('data/model_weights.npz')

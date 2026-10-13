@@ -1,8 +1,17 @@
 import numpy as np
+from typing import TypedDict
 from numpy.typing import NDArray
 from src.DenseLayer import DenseLayer
 from src.Math import binary_cross_entropy, compute_accuracy
 
+
+class HistoryDict(TypedDict):
+    loss: list[float]
+    val_loss: list[float]
+    acc: list[float]
+    val_acc: list[float]
+    thetas: list[NDArray[np.float64]]
+    total_epoch: int
 
 class NeuralNetwork:
     def __init__(self, input_size: int,
@@ -47,7 +56,7 @@ class NeuralNetwork:
             nn_dict[f"A_{i}"] = layer.activation
 
         try:
-            np.savez(path, kwargs='nn_dict')
+            np.savez(path, allow_pickle=True, **nn_dict)
         except PermissionError as error:
             print(error)
         except OSError as error:
@@ -57,18 +66,18 @@ class NeuralNetwork:
         else:
             print(f"Model saved succesfully in {path}")
 
-    def fit(self, X: np.ndarray, y: np.ndarray,
+    def fit(self, input_matrix: np.ndarray, y: np.ndarray,
             X_val: np.ndarray, y_val: np.ndarray,
             epochs: int, batch_size: int,
-            stop_early: int
-            ) -> dict[str, list[float | np.ndarray] | int]:
+            stop_early: int) -> HistoryDict:
 
-        history: dict[str, list[float | np.ndarray] | int] = {
+        history: HistoryDict = {
             'loss': [],
             'val_loss': [],
             'acc': [],
             'val_acc': [],
-            'thetas': []
+            'thetas': [],
+            'total_epoch': 0
             }
 
         width = len(str(epochs))
@@ -80,17 +89,21 @@ class NeuralNetwork:
         y_double = np.column_stack((1 - y, y))
 
         for epoch in range(epochs):
-            total_loss_train = 0
-            total_accuracy_train = 0.
+            total_loss_train: float = 0.0
+            total_accuracy_train: float = 0.0
             num_batches = 0
 
+            shuffled_indices = np.random.permutation(input_matrix.shape[0])
+            input_matrix = input_matrix[shuffled_indices]
+            y = y[shuffled_indices]
+            y_double = y_double[shuffled_indices]
 
-            for first in range(0, len(X), batch_size):
-                X_batch = X[first: first + batch_size]
+            for first in range(0, len(input_matrix), batch_size):
+                input_matrix_batch = input_matrix[first: first + batch_size]
                 y_batch = y[first: first + batch_size]
                 y_double_batch = y_double[first: first + batch_size]
 
-                forward_pass = self.forward(X_batch)
+                forward_pass = self.forward(input_matrix_batch)
 
                 loss = binary_cross_entropy(y_batch, forward_pass)
                 total_loss_train += loss
@@ -106,24 +119,19 @@ class NeuralNetwork:
             total_loss_train /= num_batches
             total_accuracy_train /= num_batches
 
-            if isinstance(history['loss'], list):
-                history['loss'].append(total_loss_train)
+            history['loss'].append(total_loss_train)
 
-            if isinstance(history['acc'], list):
-                history['acc'].append(total_accuracy_train)
+            history['acc'].append(total_accuracy_train)
 
             pred_validation = self.forward(X_val)
 
             loss_val = binary_cross_entropy(y_val, pred_validation)
-            if isinstance(history['val_loss'], list):
-                history['val_loss'].append(loss_val)
+            history['val_loss'].append(loss_val)
 
             accuracy_val = compute_accuracy(y_val, pred_validation)
-            if isinstance(history['val_acc'], list):
-                history['val_acc'].append(accuracy_val)
+            history['val_acc'].append(accuracy_val)
 
-            if isinstance(history['thetas'], list):
-                history['thetas'].append(self.get_weights_vector())
+            history['thetas'].append(self.get_weights_vector())
 
             print(f"Epoch {epoch + 1:>{width}}: "
                   f"Train loss = {total_loss_train:.8f} | "
@@ -168,13 +176,13 @@ class NeuralNetwork:
 
         for layer in self.layers:
             size = layer.weights.size
-            morceau = theta[index: index + size]
-            morceau = np.reshape(morceau, layer.weights.shape)
-            layer.weights = morceau
+            chunk = theta[index: index + size]
+            chunk = np.reshape(chunk, layer.weights.shape)
+            layer.weights = chunk
             index += size
 
             size = layer.biases.size
-            morceau = theta[index: index + size]
-            morceau = np.reshape(morceau, layer.biases.shape)
-            layer.biases = morceau
+            chunk = theta[index: index + size]
+            chunk = np.reshape(chunk, layer.biases.shape)
+            layer.biases = chunk
             index += size
