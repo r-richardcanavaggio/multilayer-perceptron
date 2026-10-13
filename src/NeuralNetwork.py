@@ -139,7 +139,20 @@ class NeuralNetwork:
         return cls(layers, None)
 
     def get_weights_vector(self) -> np.ndarray:
-        return [p.flatten() for layer in self.layers for p in (layer.weights, layer.biases)]
+        return np.concatenate([p.flatten() for layer in self.layers for p in (layer.weights, layer.biases)])
 
     def set_weights_vector(self, theta):
-        
+        index = 0
+
+        for layer in self.layers:
+            taille = layer.weights.size
+            morceau = theta[index : index + taille]
+            morceau = np.reshape(morceau, layer.weights.shape)
+            layer.weights = morceau
+            index += taille
+
+            taille = layer.biases.size
+            morceau = theta[index : index + taille]
+            morceau.reshape(layer.biases.shape)
+            layer.biases = morceau
+            index += taille

@@ -44,6 +44,9 @@ def main():
         args.stop_early
     )
 
+    vector = model.get_weights_vector()
+    model.set_weights_vector(vector)
+
     loss_plot(len(history['loss']), history['loss'], history['val_loss'])
     accuracy_plot(len(history['acc']), history['acc'], history['val_acc'])
     model.export('data/model_weights.npz')
