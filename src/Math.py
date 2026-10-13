@@ -1,11 +1,13 @@
 import numpy as np
+from numpy.typing import NDArray
+from typing import Any
 
 
-def sigmoid(x):
+def sigmoid(x: Any):
     return 1 / (1 + np.exp(-x))
 
 
-def softmax(x):
+def softmax(x: NDArray[np.float64]) -> NDArray[np.float64]:
     exponents = np.exp(x)
 
     sum_of_exponents = np.sum(exponents, axis=1, keepdims=True)
