@@ -139,5 +139,7 @@ class NeuralNetwork:
         return cls(layers, None)
 
     def get_weights_vector(self) -> np.ndarray:
-        flattened_weights = [layers.flatten() for layers in self.layers]
-        return np.concatenate(flattened_weights)
+        return [p.flatten() for layer in self.layers for p in (layer.weights, layer.biases)]
+
+    def set_weights_vector(self, theta):
+        
