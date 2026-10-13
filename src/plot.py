@@ -10,7 +10,7 @@ def loss_plot(epochs: int, losses_train: list[float], losses_val: list[float]):
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
-    plt.show()
+    plt.savefig('loss.png')
 
 
 def accuracy_plot(
@@ -26,4 +26,4 @@ def accuracy_plot(
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
     plt.legend()
-    plt.show()
+    plt.savefig('accuracy.png')

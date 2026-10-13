@@ -3,7 +3,8 @@ from src.parser import init_parser
 from src.plot import accuracy_plot, loss_plot
 from src.NeuralNetwork import NeuralNetwork
 from src.ft_load import ft_load
-
+from src.Math import binary_cross_entropy
+import matplotlib.pyplot as plt
 
 def load_data(train_path: str, val_path: str):
     training_data = ft_load(train_path).to_numpy()
@@ -44,11 +45,50 @@ def main():
         args.stop_early
     )
 
-    vector = model.get_weights_vector()
-    model.set_weights_vector(vector)
+    M = np.array(history['thetas'])
+    theta_final = M[-1]
+    A = M - theta_final
+    U, S, Vt = np.linalg.svd(A, full_matrices=False)
+    d1 = Vt[0]
+    d2 = Vt[1]
 
-    loss_plot(len(history['loss']), history['loss'], history['val_loss'])
-    accuracy_plot(len(history['acc']), history['acc'], history['val_acc'])
+    x_traj = np.dot(A, d1)
+    y_traj = np.dot(A, d2)
+    z_traj = history['loss']
+
+    u_vals = np.linspace(x_traj.min() - 0.5, x_traj.max() + 0.5, 30)
+    v_vals = np.linspace(y_traj.min() - 0.5, y_traj.max() + 0.5, 30)
+    U, V = np.meshgrid(u_vals, v_vals)
+    Z = np.zeros((30, 30))
+
+    for i in range(30):
+        for j in range(30):
+            u = U[i, j]
+            v = V[i, j]
+
+            theta = theta_final + (u * d1) + (v * d2)
+            model.set_weights_vector(theta)
+            perte = binary_cross_entropy(y, model.forward(X))
+            Z[i, j] = perte
+    model.set_weights_vector(theta_final)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.plot_surface(U, V, Z, cmap='coolwarm', alpha=0.7)
+
+    ax.plot(x_traj, y_traj, z_traj, color='black', marker='o', markersize=4)
+
+    ax.set_xlabel("Composante Principale 1 (d1)")
+    ax.set_ylabel("Composante Principale 2 (d2)")
+    ax.set_zlabel("Perte (Loss)")
+
+    plt.show()
+
+
+    
+    loss_plot(history['total_epoch'], history['loss'], history['val_loss'])
+    accuracy_plot(history['total_epoch'], history['acc'], history['val_acc'])
     model.export('data/model_weights.npz')
 
 

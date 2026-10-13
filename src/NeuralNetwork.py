@@ -62,7 +62,8 @@ class NeuralNetwork:
         history = {'loss': [],
                    'val_loss': [],
                    'acc': [],
-                   'val_acc': []}
+                   'val_acc': [],
+                   'thetas': []}
 
         width = len(str(epochs))
 
@@ -107,6 +108,14 @@ class NeuralNetwork:
             accuracy_val = compute_accuracy(y_val, pred_validation)
             history['val_acc'].append(accuracy_val)
 
+            history['thetas'].append(self.get_weights_vector())
+
+            print(f"Epoch {epoch + 1:>{width}}: "
+                  f"Train loss = {total_loss_train:.8f} | "
+                  f"Validation loss = {loss_val:.8f}")
+
+            history['total_epoch'] = epoch + 1
+
             if stop_early:
                 if epoch == 1:
                     best_val_loss = loss_val
@@ -118,11 +127,8 @@ class NeuralNetwork:
                     count_loss += 1
 
                 if count_loss == PATIENCE:
-                    return history
+                    break
 
-            print(f"Epoch {epoch + 1:>{width}}: "
-                  f"Train loss = {total_loss_train:.8f} | "
-                  f"Validation loss = {loss_val:.8f}")
         return history
 
     @classmethod
@@ -153,6 +159,6 @@ class NeuralNetwork:
 
             taille = layer.biases.size
             morceau = theta[index : index + taille]
-            morceau.reshape(layer.biases.shape)
+            morceau = np.reshape(morceau, layer.biases.shape)
             layer.biases = morceau
             index += taille
