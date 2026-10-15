@@ -3,50 +3,41 @@ from numpy.typing import NDArray
 from src.parser import init_parser
 from src.plot import accuracy_plot, loss_plot
 from src.NeuralNetwork import NeuralNetwork
-from src.ft_load import ft_load
 from src.Math import binary_cross_entropy
+from src.EarlyStopping import EarlyStopping
+from src.Dataset import Dataset
+from src.DataLoader import DataLoader
+# from src.History import History
+from src.Trainer import Trainer
 import matplotlib.pyplot as plt
 import pandas
-
-
-def load_data(train_path: str, val_path: str):
-    training_data = ft_load(train_path).to_numpy()
-    validation_data = ft_load(val_path).to_numpy()
-
-    # First column of training_data, real output
-    y_train = training_data[:, 0]
-    y_val = validation_data[:, 0]
-
-    X_train = np.ascontiguousarray(training_data[:, 1:])
-    X_val = np.ascontiguousarray(validation_data[:, 1:])
-
-    return X_train, y_train, X_val, y_val
 
 
 def main():
     np.random.seed(42)
 
     args = init_parser()
-    X, y, X_val, y_val = load_data(
-        'data/training_data.csv', 'data/testing_data.csv'
-        )
+
+    train_data = Dataset('data/training_data.csv')
+    val_data = Dataset('data/testing_data.csv')
+
+    train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
 
     model = NeuralNetwork(
-        input_size=X.shape[1],
+        input_size=train_data.columns,
         layers_sizes=args.layers,
         learning_rate=args.learning_rate,
         activation=args.activation,
         optimizer=args.optimizer
     )
 
-    history = model.fit(
-        X, y,
-        X_val, y_val,
-        args.epochs, args.batch_size,
-        args.stop_early
-    )
+    stop_early = EarlyStopping(args.stop_early) if args.stop_early else None
 
-    M = np.array(history['thetas'])
+    trainer = Trainer(model, stop_early, args.epochs)
+    history = trainer.fit(train_loader, val_loader)
+
+    M = np.array(history.history['thetas'])
     theta_final = M[-1]
     A = M - theta_final
     U, S, Vt = np.linalg.svd(A, full_matrices=False)
@@ -55,7 +46,7 @@ def main():
 
     x_traj = np.dot(A, d1)
     y_traj = np.dot(A, d2)
-    z_traj = history['loss']
+    z_traj = history.history['loss']
 
     u_vals: NDArray[np.float64] = np.linspace(x_traj.min() - 0.5, x_traj.max() + 0.5, 30, dtype=np.float64)
     v_vals: NDArray[np.float64] = np.linspace(y_traj.min() - 0.5, y_traj.max() + 0.5, 30, dtype=np.float64)
@@ -71,8 +62,7 @@ def main():
 
             theta = theta_final + (u * d1) + (v * d2)
             model.set_weights_vector(theta)
-            perte = binary_cross_entropy(y, model.forward(X))
-            Z[i, j] = perte
+            Z[i, j] = binary_cross_entropy(train_data.labels, model.forward(train_data.parameters))
     model.set_weights_vector(theta_final)
 
     fig = plt.figure(figsize=(10, 7))
@@ -88,10 +78,10 @@ def main():
 
     plt.show()
 
-    loss_plot(history['total_epoch'], history['loss'], history['val_loss'])
-    accuracy_plot(history['total_epoch'], history['acc'], history['val_acc'])
+    loss_plot(history.history['total_epoch'], history.history['loss'], history.history['val_loss'])
+    accuracy_plot(history.history['total_epoch'], history.history['accuracy'], history.history['val_accuracy'])
     model.export('data/model_weights.npz')
-    pandas.DataFrame(history).to_csv('history.csv')
+    pandas.DataFrame(history.history).to_csv('history.csv')
 
 
 if __name__ == "__main__":

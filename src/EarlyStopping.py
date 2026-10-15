@@ -1,5 +1,5 @@
 class EarlyStopping:
-    def __init__(self, patience: int=10):
+    def __init__(self, patience: int = 10):
         self.best_val_loss = float('inf')
         self.count_loss = 0
         self.patience = patience
@@ -9,7 +9,8 @@ class EarlyStopping:
             self.count_loss = 0
             self.best_val_loss = current_val_loss
             return False
-        elif current_val_loss >= self.best_val_loss and self.count_loss != self.patience:
+        elif (current_val_loss >= self.best_val_loss
+              and self.count_loss != self.patience):
             self.count_loss += 1
             return False
         else:

@@ -4,7 +4,7 @@ import pandas
 def main():
     cols = pandas.read_csv('data/data.csv', header=None, nrows=0).columns
     df = pandas.read_csv('data/data.csv', header=None, usecols=cols[1:])
-    
+
     df[df.columns[0]] = df[df.columns[0]].replace({'M': 1})
     df[df.columns[0]] = df[df.columns[0]].replace({'B': 0})
 

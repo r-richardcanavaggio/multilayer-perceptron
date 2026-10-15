@@ -14,3 +14,7 @@ class Dataset:
 
     def __getitem__(self, idx: Any):
         return self.parameters[idx], self.labels[idx]
+
+    @property
+    def columns(self) -> int:
+        return self.parameters.shape[1]

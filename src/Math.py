@@ -26,14 +26,16 @@ def glorot(row: int, col: int) -> NDArray[np.float64]:
     return scaled
 
 
-def binary_cross_entropy(y_true: NDArray[np.float64], y_pred: NDArray[np.float64]) -> float:
+def binary_cross_entropy(y_true: NDArray[np.float64],
+                         y_pred: NDArray[np.float64]) -> float:
     bce = -np.mean(
         y_true * np.log(y_pred[:, 1]) + (1 - y_true) * np.log(y_pred[:, 0])
     )
     return bce
 
 
-def compute_accuracy(y_true: NDArray[np.float64], y_pred: NDArray[np.float64]) -> float:
+def compute_accuracy(y_true: NDArray[np.float64],
+                     y_pred: NDArray[np.float64]) -> float:
     raw_predict = y_pred.copy()
     prediction = np.argmax(raw_predict, axis=1)
     return (y_true == prediction).sum() / y_pred.shape[0]
