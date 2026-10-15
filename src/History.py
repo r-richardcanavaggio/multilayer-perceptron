@@ -3,6 +3,7 @@ from numpy.typing import NDArray
 from numpy import float64
 import matplotlib.pyplot as plt
 
+
 class HistoryDict(TypedDict):
     loss: list[float]
     val_loss: list[float]
@@ -45,8 +46,8 @@ class History:
         x = [x for x in range(self.history['total_epoch'])]
         plt.plot(x, self.history['loss'], color='blue', label='training loss')
         plt.plot(x, self.history['val_loss'],
-                    color='orange', linestyle='--',
-                    label='validation loss')
+                 color='orange', linestyle='--',
+                 label='validation loss')
         plt.xlabel("Epochs")
         plt.ylabel("Loss")
         plt.legend()
@@ -57,8 +58,8 @@ class History:
         plt.plot(x, self.history['accuracy'],
                  color='blue', label='training accuracy')
         plt.plot(x, self.history['val_accuracy'],
-                color='orange', linestyle='--',
-                label='validation accuracy')
+                 color='orange', linestyle='--',
+                 label='validation accuracy')
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy")
         plt.legend()

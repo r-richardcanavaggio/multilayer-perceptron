@@ -1,13 +1,11 @@
 import numpy as np
-from numpy.typing import NDArray
 from src.parser import init_parser
 from src.NeuralNetwork import NeuralNetwork
-from src.Math import binary_cross_entropy
 from src.EarlyStopping import EarlyStopping
 from src.Dataset import Dataset
 from src.DataLoader import DataLoader
 from src.Trainer import Trainer
-import matplotlib.pyplot as plt
+from src.LossLandscape import LossLandscape
 import pandas
 
 
@@ -19,8 +17,10 @@ def main():
     train_data = Dataset('data/training_data.csv')
     val_data = Dataset('data/testing_data.csv')
 
-    train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=args.batch_size, shuffle=False)
+    train_loader = DataLoader(train_data,
+                              batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_data,
+                            batch_size=args.batch_size, shuffle=False)
 
     model = NeuralNetwork(
         input_size=train_data.columns,
@@ -35,46 +35,9 @@ def main():
     trainer = Trainer(model, stop_early, args.epochs)
     history = trainer.fit(train_loader, val_loader)
 
-    M = np.array(history.history['thetas'])
-    theta_final = M[-1]
-    A = M - theta_final
-    U, S, Vt = np.linalg.svd(A, full_matrices=False)
-    d1 = Vt[0]
-    d2 = Vt[1]
-
-    x_traj = np.dot(A, d1)
-    y_traj = np.dot(A, d2)
-    z_traj = history.history['loss']
-
-    u_vals: NDArray[np.float64] = np.linspace(x_traj.min() - 0.5, x_traj.max() + 0.5, 30, dtype=np.float64)
-    v_vals: NDArray[np.float64] = np.linspace(y_traj.min() - 0.5, y_traj.max() + 0.5, 30, dtype=np.float64)
-
-    u_matrix, v_matrix = np.meshgrid(u_vals, v_vals)
-
-    Z = np.zeros((30, 30))
-
-    for i in range(30):
-        for j in range(30):
-            u = u_matrix[i, j]
-            v = v_matrix[i, j]
-
-            theta = theta_final + (u * d1) + (v * d2)
-            model.set_weights_vector(theta)
-            Z[i, j] = binary_cross_entropy(train_data.labels, model.forward(train_data.parameters))
-    model.set_weights_vector(theta_final)
-
-    fig = plt.figure(figsize=(10, 7))
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.plot_surface(u_matrix, v_matrix, Z, cmap='coolwarm', alpha=0.7)
-
-    ax.plot(x_traj, y_traj, z_traj, color='black', marker='o', markersize=4)
-
-    ax.set_xlabel("Composante Principale 1 (d1)")
-    ax.set_ylabel("Composante Principale 2 (d2)")
-    ax.set_zlabel("Perte (Loss)")
-
-    plt.show()
+    loss3d = LossLandscape(model, train_data,
+                           history.history['thetas'], history.history['loss'])
+    loss3d.plot()
 
     history.plot_loss()
     history.plot_acc()
