@@ -3,6 +3,7 @@ from typing import TypedDict
 from numpy.typing import NDArray
 from src.DenseLayer import DenseLayer
 from src.Math import binary_cross_entropy, compute_accuracy
+from src.EarlyStopping import EarlyStopping
 
 
 class HistoryDict(TypedDict):
@@ -12,6 +13,7 @@ class HistoryDict(TypedDict):
     val_acc: list[float]
     thetas: list[NDArray[np.float64]]
     total_epoch: int
+
 
 class NeuralNetwork:
     def __init__(self, input_size: int,
@@ -69,7 +71,7 @@ class NeuralNetwork:
     def fit(self, input_matrix: np.ndarray, y: np.ndarray,
             X_val: np.ndarray, y_val: np.ndarray,
             epochs: int, batch_size: int,
-            stop_early: int) -> HistoryDict:
+            early_stop: EarlyStopping | None) -> HistoryDict:
 
         history: HistoryDict = {
             'loss': [],
@@ -81,9 +83,6 @@ class NeuralNetwork:
             }
 
         width = len(str(epochs))
-        patience = stop_early
-        best_val_loss = float('inf')
-        count_loss = 0
 
         # Output in a binary format, M = [0, 1] B = [1, 0]
         y_double = np.column_stack((1 - y, y))
@@ -139,15 +138,8 @@ class NeuralNetwork:
 
             history['total_epoch'] = epoch + 1
 
-            if stop_early:
-                if loss_val < best_val_loss:
-                    count_loss = 0
-                    best_val_loss = loss_val
-                else:
-                    count_loss += 1
-
-                if count_loss == patience:
-                    break
+            if early_stop and early_stop.should_stop(loss_val):
+                break
 
         return history
 
