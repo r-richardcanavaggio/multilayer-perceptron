@@ -1,13 +1,11 @@
 import numpy as np
 from numpy.typing import NDArray
 from src.parser import init_parser
-from src.plot import accuracy_plot, loss_plot
 from src.NeuralNetwork import NeuralNetwork
 from src.Math import binary_cross_entropy
 from src.EarlyStopping import EarlyStopping
 from src.Dataset import Dataset
 from src.DataLoader import DataLoader
-# from src.History import History
 from src.Trainer import Trainer
 import matplotlib.pyplot as plt
 import pandas
@@ -78,8 +76,8 @@ def main():
 
     plt.show()
 
-    loss_plot(history.history['total_epoch'], history.history['loss'], history.history['val_loss'])
-    accuracy_plot(history.history['total_epoch'], history.history['accuracy'], history.history['val_accuracy'])
+    history.plot_loss()
+    history.plot_acc()
     model.export('data/model_weights.npz')
     pandas.DataFrame(history.history).to_csv('history.csv')
 
