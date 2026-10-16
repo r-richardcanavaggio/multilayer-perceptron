@@ -3,7 +3,6 @@
 MLP.subject.pdf
 __pycache__
 *.csv
-*.png
 .vscode
 .mypy_cache
 *.npz

@@ -76,4 +76,6 @@ class LossLandscape:
         ax.set_ylabel("Composante Principale 2 (d2)")
         ax.set_zlabel("Perte (Loss)")
 
+        plt.savefig('plots/loss_landscape.png', bbox_inches='tight')
         plt.show()
+        plt.close(fig)

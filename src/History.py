@@ -42,6 +42,7 @@ class History:
               f"Validation loss = {self.history['val_loss'][epoch]:.8f}")
 
     def plot_loss(self) -> None:
+        plt.figure()
         x = [x for x in range(self.history['total_epoch'])]
         plt.plot(x, self.history['loss'], color='blue', label='training loss')
         plt.plot(x, self.history['val_loss'],
@@ -50,10 +51,11 @@ class History:
         plt.xlabel("Epochs")
         plt.ylabel("Loss")
         plt.legend()
-        plt.savefig('loss.png')
+        plt.savefig('plots/loss.png')
         plt.close()
 
     def plot_acc(self) -> None:
+        plt.figure()
         x = [i for i in range(self.history['total_epoch'])]
         plt.plot(x, self.history['accuracy'],
                  color='blue', label='training accuracy')
@@ -63,5 +65,5 @@ class History:
         plt.xlabel("Epochs")
         plt.ylabel("Accuracy")
         plt.legend()
-        plt.savefig('accuracy.png')
+        plt.savefig('plots/accuracy.png')
         plt.close()
