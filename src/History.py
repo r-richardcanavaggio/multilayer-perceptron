@@ -51,6 +51,7 @@ class History:
         plt.ylabel("Loss")
         plt.legend()
         plt.savefig('loss.png')
+        plt.close()
 
     def plot_acc(self) -> None:
         x = [i for i in range(self.history['total_epoch'])]
@@ -63,3 +64,4 @@ class History:
         plt.ylabel("Accuracy")
         plt.legend()
         plt.savefig('accuracy.png')
+        plt.close()
