@@ -1,25 +1,24 @@
 from src.NeuralNetwork import NeuralNetwork
 from src.Dataset import Dataset
-from numpy.typing import NDArray
-from numpy import float64
-import numpy as np
+from src.type import Tensor
 from src.Math import binary_cross_entropy
+import numpy as np
 import matplotlib.pyplot as plt
 
 
 class LossLandscape:
     def __init__(self, model: NeuralNetwork, dataset: Dataset,
-                 thetas: list[NDArray[float64]], losses: list[float]):
+                 thetas: list[Tensor], losses: list[float]):
         self.model = model
         self.dataset = dataset
         self.thetas = thetas
         self.losses = losses
 
-        self.d1: NDArray[float64]
-        self.d2: NDArray[float64]
+        self.d1: Tensor
+        self.d2: Tensor
 
-        self.x_traj: NDArray[float64]
-        self.y_traj: NDArray[float64]
+        self.x_traj: Tensor
+        self.y_traj: Tensor
         self.z_traj: list[float]
 
     def _compute_pca_directions(self):
@@ -36,10 +35,10 @@ class LossLandscape:
         self.z_traj = self.losses
 
     def _compute_surface(self, resolution: int):
-        u_vals: NDArray[np.float64] = np.linspace(
+        u_vals: Tensor = np.linspace(
             self.x_traj.min() - 0.5, self.x_traj.max() + 0.5,
             resolution, dtype=np.float64)
-        v_vals: NDArray[np.float64] = np.linspace(
+        v_vals: Tensor = np.linspace(
             self.y_traj.min() - 0.5, self.y_traj.max() + 0.5,
             resolution, dtype=np.float64)
 

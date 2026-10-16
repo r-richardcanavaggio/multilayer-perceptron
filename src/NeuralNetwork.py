@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.typing import NDArray
 from src.DenseLayer import DenseLayer
 from src.Optimizer import OptimizerFactory
+from src.type import Tensor
 
 
 class NeuralNetwork:
@@ -30,20 +30,20 @@ class NeuralNetwork:
             weights_initializer='glorot', optimizer=opt)
         )
 
-    def forward(self, input: NDArray[np.float64]) -> NDArray[np.float64]:
+    def forward(self, input: Tensor) -> Tensor:
         out = input
         for layer in self.layers:
             out = layer.feed_forward(out)
         return out
 
-    def backward(self, d_Z: np.ndarray) -> np.ndarray:
+    def backward(self, d_Z: Tensor) -> Tensor:
         out = d_Z
         for layer in reversed(self.layers):
             out = layer.backward(out)
         return out
 
     def export(self, path: str):
-        nn_dict: dict[str, NDArray[np.float64] | str] = {}
+        nn_dict: dict[str, Tensor | str] = {}
 
         for i, layer in enumerate(self.layers):
             nn_dict[f"W_{i}"] = layer.weights
@@ -76,10 +76,12 @@ class NeuralNetwork:
         instance.layers = layers
         return instance
 
-    def get_weights_vector(self) -> np.ndarray:
-        return np.concatenate([p.flatten() for layer in self.layers for p in (layer.weights, layer.biases)])
+    def get_weights_vector(self) -> Tensor:
+        flat = [p.flatten() for layer in self.layers
+                for p in (layer.weights, layer.biases)]
+        return np.concatenate(flat)
 
-    def set_weights_vector(self, theta: np.ndarray):
+    def set_weights_vector(self, theta: Tensor):
         index = 0
 
         for layer in self.layers:

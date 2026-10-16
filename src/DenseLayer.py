@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.typing import NDArray
+from src.type import Tensor
 from src.Math import sigmoid, softmax, glorot
 from src.Optimizer import Optimizer
 
@@ -16,10 +16,10 @@ class DenseLayer:
         self.optimizer = optimizer
 
         if self.weights_initializer == "glorot":
-            self.weights: NDArray[np.float64] = glorot(
+            self.weights: Tensor = glorot(
                 self.input_size, self.output_size)
 
-        self.biases: NDArray[np.float64] = np.zeros(self.output_size)
+        self.biases: Tensor = np.zeros(self.output_size)
 
     def __repr__(self):
         return (f"DenseLayer object: input = {self.input_size}"
@@ -27,11 +27,10 @@ class DenseLayer:
                 f" | activation = {self.activation}"
                 f" | weights initializer = {self.weights_initializer}")
 
-    def feed_forward(self,
-                     input_matrix: NDArray[np.float64]) -> NDArray[np.float64]:
+    def feed_forward(self, input_matrix: Tensor) -> Tensor:
         self.input_matrix = input_matrix
         self.z = np.dot(self.input_matrix, self.weights) + self.biases
-        self.activated_matrix: NDArray[np.float64]
+        self.activated_matrix: Tensor
 
         if self.activation == "sigmoid":
             self.activated_matrix = sigmoid(self.z)
@@ -40,8 +39,8 @@ class DenseLayer:
 
         return self.activated_matrix
 
-    def backward(self, d_Z_next: NDArray[np.float64]) -> NDArray[np.float64]:
-        d_Z: NDArray[np.float64] = np.zeros_like(self.activated_matrix)
+    def backward(self, d_Z_next: Tensor) -> Tensor:
+        d_Z: Tensor = np.zeros_like(self.activated_matrix)
 
         if self.activation == "sigmoid":
             d_Z = d_Z_next * (self.activated_matrix *
@@ -61,8 +60,8 @@ class DenseLayer:
         return d_Prev
 
     @classmethod
-    def from_computed(cls, weights: np.ndarray,
-                      biases: np.ndarray, activation: str) -> DenseLayer:
+    def from_computed(cls, weights: Tensor, biases: Tensor,
+                      activation: str) -> DenseLayer:
         instance = cls(0, 0, activation, '', '')
         instance.weights = weights
         instance.biases = biases
