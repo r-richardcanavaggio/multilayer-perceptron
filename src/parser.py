@@ -48,5 +48,17 @@ def init_parser() -> argparse.Namespace:
         "Inactive by default. If flag is present,"
         "defaults to 10."
     )
+    parser.add_argument(
+        "--beta1", type=float, default=0.9,
+        help="Beta1 for Adam"
+    )
+    parser.add_argument(
+        "--beta2", type=float, default=0.999,
+        help="Beta2 for Adam"
+    )
+    parser.add_argument(
+        "--eps", type=float, default=1e-8,
+        help="Epsilon value for Adam"
+    )
 
     return parser.parse_args()

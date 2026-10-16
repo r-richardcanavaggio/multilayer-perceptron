@@ -1,29 +1,34 @@
 import numpy as np
 from numpy.typing import NDArray
 from src.DenseLayer import DenseLayer
+from src.Optimizer import OptimizerFactory
 
 
 class NeuralNetwork:
     def __init__(self, input_size: int,
                  layers_sizes: list[int], learning_rate: float,
-                 activation: str, optimizer: str):
-        self.learning_rate = learning_rate
+                 activation: str, optimizer: str, **optimizer_kwargs: float):
         self.layers: list[DenseLayer] = []
 
         if not layers_sizes:
             return
 
         for layer in layers_sizes:
+            opt = OptimizerFactory.create(
+                optimizer, learning_rate=learning_rate, **optimizer_kwargs)
             new_layer = DenseLayer(
                 input_size, layer, activation=activation,
-                weights_initializer='glorot', optimizer=optimizer
+                weights_initializer='glorot', optimizer=opt
             )
             self.layers.append(new_layer)
             input_size = layer
+
+        opt = OptimizerFactory.create(
+            optimizer, learning_rate=learning_rate, **optimizer_kwargs)
         self.layers.append(DenseLayer(
             layers_sizes[-1], 2, activation='softmax',
-            weights_initializer='glorot', optimizer=optimizer
-        ))
+            weights_initializer='glorot', optimizer=opt)
+        )
 
     def forward(self, input: NDArray[np.float64]) -> NDArray[np.float64]:
         out = input
@@ -34,7 +39,7 @@ class NeuralNetwork:
     def backward(self, d_Z: np.ndarray) -> np.ndarray:
         out = d_Z
         for layer in reversed(self.layers):
-            out = layer.backward(out, self.learning_rate)
+            out = layer.backward(out)
         return out
 
     def export(self, path: str):

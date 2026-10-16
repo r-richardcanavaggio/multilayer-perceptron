@@ -27,7 +27,10 @@ def main():
         layers_sizes=args.layers,
         learning_rate=args.learning_rate,
         activation=args.activation,
-        optimizer=args.optimizer
+        optimizer=args.optimizer,
+        beta1=args.beta1,
+        beta2=args.beta2,
+        epsilon=args.eps
     )
 
     stop_early = EarlyStopping(args.stop_early) if args.stop_early else None
