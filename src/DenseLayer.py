@@ -1,7 +1,7 @@
 import numpy as np
 from src.type import Tensor
 from src.Math import sigmoid, softmax, glorot
-from src.Optimizer import Optimizer
+from src.Optimizer import Optimizer, OptimizerFactory
 
 
 class DenseLayer:
@@ -21,7 +21,7 @@ class DenseLayer:
 
         self.biases: Tensor = np.zeros(self.output_size)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (f"DenseLayer object: input = {self.input_size}"
                 f" | output = {self.output_size}"
                 f" | activation = {self.activation}"
@@ -39,30 +39,33 @@ class DenseLayer:
 
         return self.activated_matrix
 
-    def backward(self, d_Z_next: Tensor) -> Tensor:
-        d_Z: Tensor = np.zeros_like(self.activated_matrix)
-
+    def _compute_activation_gradient(self, grad_output: Tensor) -> Tensor:
         if self.activation == "sigmoid":
-            d_Z = d_Z_next * (self.activated_matrix *
-                              (1 - self.activated_matrix))
-        elif self.activation == "softmax":
-            d_Z = d_Z_next
+            grad_output *= (self.activated_matrix *
+                            (1 - self.activated_matrix))
+        return grad_output
 
+    def _compute_gradients(self, d_Z: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         d_weights = (np.dot(self.input_matrix.transpose(), d_Z) /
                      self.input_matrix.shape[0])
         d_biases = d_Z.sum(axis=0) / self.input_matrix.shape[0]
+        grad_input = np.dot(d_Z, self.weights.transpose())
 
-        d_Prev = np.dot(d_Z, self.weights.transpose())
+        return d_weights, d_biases, grad_input
+
+    def backward(self, grad_output: Tensor) -> Tensor:
+        d_Z = self._compute_activation_gradient(grad_output)
+
+        d_weights, d_biases, grad_input = self._compute_gradients(d_Z)
 
         self.weights, self.biases = self.optimizer.update(
             self.weights, self.biases, d_weights, d_biases)
 
-        return d_Prev
+        return grad_input
 
     @classmethod
-    def from_computed(cls, weights: Tensor, biases: Tensor,
-                      activation: str) -> DenseLayer:
-        instance = cls(0, 0, activation, '', '')
-        instance.weights = weights
-        instance.biases = biases
+    def from_computed(cls, w: Tensor, b: Tensor, act: str) -> DenseLayer:
+        instance = cls(0, 0, act, '', OptimizerFactory.create('SGD', 0.0))
+        instance.weights = w
+        instance.biases = b
         return instance

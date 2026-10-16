@@ -9,7 +9,7 @@ from src.LossLandscape import LossLandscape
 import pandas
 
 
-def main():
+def main() -> None:
     np.random.seed(42)
 
     args = init_parser()

@@ -4,7 +4,7 @@ import numpy as np
 import pandas
 
 
-def main():
+def main() -> None:
     data = pandas.read_csv('data/testing_data.csv').to_numpy()
     model = NeuralNetwork.from_npz('data/model_weights.npz')
 

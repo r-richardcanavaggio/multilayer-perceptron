@@ -1,4 +1,6 @@
+from collections.abc import Iterator
 from src.Dataset import Dataset
+from src.type import Tensor
 import numpy as np
 
 
@@ -9,10 +11,10 @@ class DataLoader:
         self.batch_size = batch_size
         self.shuffle = shuffle
 
-    def __len__(self):
+    def __len__(self) -> int:
         return int(np.ceil(len(self.input_set) / self.batch_size))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[Tensor, Tensor]]:
         n = len(self.input_set)
 
         indices = np.random.permutation(n) if self.shuffle else np.arange(n)

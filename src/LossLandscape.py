@@ -21,7 +21,7 @@ class LossLandscape:
         self.y_traj: Tensor
         self.z_traj: list[float]
 
-    def _compute_pca_directions(self):
+    def _compute_pca_directions(self) -> None:
         matrix = np.array(self.thetas)
         self.theta_final = matrix[-1]
         centered_matrix = matrix - self.theta_final
@@ -34,7 +34,7 @@ class LossLandscape:
         self.y_traj = np.dot(centered_matrix, self.d2)
         self.z_traj = self.losses
 
-    def _compute_surface(self, resolution: int):
+    def _compute_surface(self, resolution: int) -> None:
         u_vals: Tensor = np.linspace(
             self.x_traj.min() - 0.5, self.x_traj.max() + 0.5,
             resolution, dtype=np.float64)
@@ -59,7 +59,7 @@ class LossLandscape:
 
         self.model.set_weights_vector(self.theta_final)
 
-    def plot(self, resolution=30):
+    def plot(self, resolution: int = 30) -> None:
         self._compute_pca_directions()
         self._compute_surface(resolution)
 

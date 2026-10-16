@@ -1,7 +1,7 @@
 import pandas
 
 
-def main():
+def main() -> None:
     cols = pandas.read_csv('data/data.csv', header=None, nrows=0).columns
     df = pandas.read_csv('data/data.csv', header=None, usecols=cols[1:])
 

@@ -17,7 +17,8 @@ def softmax(x: Tensor) -> Tensor:
 
 def glorot(row: int, col: int) -> Tensor:
     n = row * col
-    lower, upper = -(1.0 / np.sqrt(n)), (1.0 / np.sqrt(n))
+    lower: float = -(1.0 / np.sqrt(n))
+    upper: float = (1.0 / np.sqrt(n))
 
     numbers = np.random.rand(n)
     scaled = lower + numbers * (upper - lower)
@@ -35,4 +36,5 @@ def binary_cross_entropy(y_true: Tensor, y_pred: Tensor) -> float:
 def compute_accuracy(y_true: Tensor, y_pred: Tensor) -> float:
     raw_predict = y_pred.copy()
     prediction = np.argmax(raw_predict, axis=1)
-    return (y_true == prediction).sum() / y_pred.shape[0]
+
+    return float(np.mean(y_true == prediction))

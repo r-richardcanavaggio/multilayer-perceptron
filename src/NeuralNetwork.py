@@ -42,7 +42,7 @@ class NeuralNetwork:
             out = layer.backward(out)
         return out
 
-    def export(self, path: str):
+    def export(self, path: str) -> None:
         nn_dict: dict[str, Tensor | str] = {}
 
         for i, layer in enumerate(self.layers):
@@ -62,7 +62,7 @@ class NeuralNetwork:
             print(f"Model saved succesfully in {path}")
 
     @classmethod
-    def from_npz(cls, filename: str):
+    def from_npz(cls, filename: str) -> NeuralNetwork:
         loaded_layers = np.load(filename)
         layers: list[DenseLayer] = []
 
@@ -81,7 +81,7 @@ class NeuralNetwork:
                 for p in (layer.weights, layer.biases)]
         return np.concatenate(flat)
 
-    def set_weights_vector(self, theta: Tensor):
+    def set_weights_vector(self, theta: Tensor) -> None:
         index = 0
 
         for layer in self.layers:
