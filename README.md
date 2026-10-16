@@ -39,7 +39,7 @@ The repository is organized following modern object-oriented deep learning frame
 ┌──────────────────┐      Forward Pass: Z = X·W + b, A = σ(Z)
 │    DenseLayer    ├────────────────────────────────────────────┐
 └────────▲─────────┘                                            │
-         │                Backward Pass: dX = dZ·Wᵀ                     ▼
+         │                Backward Pass: dX = dZ·Wᵀ             ▼
          │             ◄───────────────────────────      ┌──────────────┐
          │                                               │ DenseLayer   │
          │                                               │ (Output)     │
@@ -72,29 +72,34 @@ The repository is organized following modern object-oriented deep learning frame
 ## 🧠 Engineering Highlights
 
 ### 1. Vectorized Backpropagation & Combined Analytical Derivative
-Rather than calculating individual scalar derivatives, all operations are vectorized across batch dimension $B$:
 
-- **Output Layer Simplification**: Computing the derivative of Softmax paired with Binary Cross-Entropy loss analytically simplifies the gradient calculation. The partial derivative with respect to the output pre-activation $Z^{[L]}$ reduces directly to:
+Rather than calculating individual scalar derivatives, all operations are vectorized across batch dimension $B$.
 
-  $$
-  \frac{\partial \mathcal{L}}{\partial Z^{[L]}} = \hat{Y} - Y
-  $$
+#### Output Layer Simplification
 
-  This eliminates the need to compute or allocate the intermediate $K \times K$ Softmax Jacobian matrix.
+Computing the derivative of Softmax paired with Binary Cross-Entropy loss analytically simplifies the gradient calculation. The partial derivative with respect to the output pre-activation $Z^{[L]}$ reduces directly to:
 
-- **Hidden Layer Gradient Contraction**: Backpropagation proceeds upstream using pure matrix products:
+$$
+\frac{\partial \mathcal{L}}{\partial Z^{[L]}} = \hat{Y} - Y
+$$
 
-  $$
-  \frac{\partial \mathcal{L}}{\partial Z^{[l]}} = \frac{\partial \mathcal{L}}{\partial A^{[l]}} \odot \sigma'\left(Z^{[l]}\right)
-  $$
+This eliminates the need to compute or allocate the intermediate $K \times K$ Softmax Jacobian matrix.
 
-  $$
-  \frac{\partial \mathcal{L}}{\partial W^{[l]}} = \frac{1}{B} \left(A^{[l-1]}\right)^T \frac{\partial \mathcal{L}}{\partial Z^{[l]}}, \quad \frac{\partial \mathcal{L}}{\partial b^{[l]}} = \frac{1}{B} \sum_{i=1}^B \frac{\partial \mathcal{L}}{\partial Z^{[l]}}
-  $$
+#### Hidden Layer Gradient Contraction
 
-  $$
-  \frac{\partial \mathcal{L}}{\partial A^{[l-1]}} = \frac{\partial \mathcal{L}}{\partial Z^{[l]}} \left(W^{[l]}\right)^T
-  $$
+Backpropagation proceeds upstream through hidden layers using pure matrix products:
+
+$$
+\frac{\partial \mathcal{L}}{\partial Z^{[l]}} = \frac{\partial \mathcal{L}}{\partial A^{[l]}} \odot \sigma'\left(Z^{[l]}\right)
+$$
+
+$$
+\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \frac{1}{B} (A^{[l-1]})^T \frac{\partial \mathcal{L}}{\partial Z^{[l]}}, \quad \frac{\partial \mathcal{L}}{\partial b^{[l]}} = \frac{1}{B} \sum_{i=1}^B \frac{\partial \mathcal{L}}{\partial Z^{[l]}}
+$$
+
+$$
+\frac{\partial \mathcal{L}}{\partial A^{[l-1]}} = \frac{\partial \mathcal{L}}{\partial Z^{[l]}} (W^{[l]})^T
+$$
 
 ### 2. Adaptive Moment Estimation (Adam) From Scratch
 Implemented the Adam optimizer with bias correction to accelerate convergence in non-convex loss surfaces:
