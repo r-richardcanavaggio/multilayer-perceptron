@@ -13,7 +13,8 @@ def main() -> None:
     try:
         df = pandas.read_csv(path, header=None)
         if df.shape[1] < 2:
-            print(f"Error: '{path}' does not contain enough columns.", file=sys.stderr)
+            print(f"Error: '{path}' does not contain enough columns.",
+                  file=sys.stderr)
             sys.exit(1)
         df = df.iloc[:, 1:]
         print(f"Data from '{path}' successfully loaded.")
@@ -27,7 +28,8 @@ def main() -> None:
         print(f"Error: File '{path}' is empty.", file=sys.stderr)
         sys.exit(1)
     except pandas.errors.ParserError:
-        print(f"Error: Unable to parse '{path}', file may be corrupted.", file=sys.stderr)
+        print(f"Error: Unable to parse '{path}', file may be corrupted.",
+              file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"Unexpected error while reading '{path}': {e}", file=sys.stderr)
@@ -61,7 +63,8 @@ def main() -> None:
         df_train.to_csv('data/training_data.csv', index=False)
         df_test.to_csv('data/testing_data.csv', index=False)
         print("Data split completed successfully:")
-        print(f"  - Training set: data/training_data.csv ({len(df_train)} rows)")
+        print("  - Training set: data/training_data.csv "
+              f"({len(df_train)} rows)")
         print(f"  - Testing set:  data/testing_data.csv ({len(df_test)} rows)")
     except Exception as e:
         print(f"Error while saving split data: {e}", file=sys.stderr)
