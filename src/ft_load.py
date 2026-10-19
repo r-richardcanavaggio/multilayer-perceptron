@@ -8,17 +8,18 @@ def ft_load(path: str) -> pandas.DataFrame:
         print(f"Successfully loaded data in {path}")
         return df
     except FileNotFoundError:
-        print(f"FileNotFoundError: {path}")
-        sys.exit()
+        print(f"Error: File '{path}' not found.", file=sys.stderr)
+        sys.exit(1)
     except PermissionError:
-        print(f"PermissionError: denied {path}")
-        sys.exit()
+        print(f"Error: Permission denied for '{path}'.", file=sys.stderr)
+        sys.exit(1)
+    except pandas.errors.EmptyDataError:
+        print(f"Error: File '{path}' is empty.", file=sys.stderr)
+        sys.exit(1)
     except pandas.errors.ParserError:
-        print(f"Error: Data Parsing Error. Data might be corrupted in {path}")
-        sys.exit()
-    except UnicodeDecodeError:
-        print(f"UnicodeDecodeError: File could not be decoded at {path}")
-        sys.exit()
+        print(f"Error: Unable to parse '{path}', file may be corrupted.",
+              file=sys.stderr)
+        sys.exit(1)
     except Exception as e:
-        print(f"Unexepected error while reading file {e}")
-        sys.exit()
+        print(f"Unexpected error while reading '{path}': {e}", file=sys.stderr)
+        sys.exit(1)
