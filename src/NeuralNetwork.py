@@ -6,9 +6,10 @@ from src.type import Tensor
 
 class NeuralNetwork:
     def __init__(self, input_size: int,
-                 layers_sizes: list[int], learning_rate: float,
+                 layers_sizes: list[int], learning_rate: float | None,
                  activation: str, optimizer: str, **optimizer_kwargs: float):
         self.layers: list[DenseLayer] = []
+        self.optimizer_name: str = optimizer
 
         if not layers_sizes:
             return
@@ -96,3 +97,10 @@ class NeuralNetwork:
             chunk = np.reshape(chunk, layer.biases.shape)
             layer.biases = chunk
             index += size
+
+    def size(self) -> list[int]:
+        size: list[int] = []
+
+        for layer in self.layers:
+            size.append(layer.input_size)
+        return size

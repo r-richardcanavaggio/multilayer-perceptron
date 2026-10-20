@@ -10,7 +10,7 @@ import pandas
 
 
 def main() -> None:
-    np.random.seed(42)
+    # np.random.seed(42)
 
     args = init_parser()
 

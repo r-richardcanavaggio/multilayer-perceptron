@@ -4,8 +4,13 @@ from src.type import Tensor
 
 
 class Optimizer(ABC):
-    def __init__(self, learning_rate: float, **kwargs: float):
-        self.lr = learning_rate
+    DEFAULT_LR: float
+
+    def __init__(self, learning_rate: float | None, **kwargs: float):
+        if learning_rate is None:
+            self.lr = self.DEFAULT_LR
+        else:
+            self.lr = learning_rate
 
     @abstractmethod
     def update(self, weights: Tensor, biases: Tensor,
@@ -17,6 +22,8 @@ OptimizerType = type[Optimizer]
 
 
 class SGDOptimizer(Optimizer):
+    DEFAULT_LR: float = 0.314
+
     def update(self, weights: Tensor, biases: Tensor,
                d_weights: Tensor, d_biases: Tensor) -> tuple[Tensor, Tensor]:
         new_weights = weights - self.lr * d_weights
@@ -25,7 +32,9 @@ class SGDOptimizer(Optimizer):
 
 
 class AdamOptimizer(Optimizer):
-    def __init__(self, learning_rate: float,
+    DEFAULT_LR: float = 0.001
+
+    def __init__(self, learning_rate: float | None,
                  beta1: float = 0.9, beta2: float = 0.999,
                  epsilon: float = 1e-8, **kwargs: float):
         super().__init__(learning_rate, **kwargs)
@@ -76,7 +85,7 @@ class OptimizerFactory:
     }
 
     @classmethod
-    def create(cls, name: str, learning_rate: float,
+    def create(cls, name: str, learning_rate: float | None = None,
                **kwargs: float) -> Optimizer:
         name = name.lower()
         if name not in cls._REGISTRY:

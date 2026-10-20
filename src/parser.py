@@ -26,7 +26,7 @@ def init_parser() -> argparse.Namespace:
     )
     parser.add_argument(
         "-lR", "--learning_rate",
-        type=float, default=0.314,
+        type=float, default=None,
         help="Floating point value of learning rate"
     )
     parser.add_argument(
@@ -37,15 +37,15 @@ def init_parser() -> argparse.Namespace:
     parser.add_argument(
         "-o", "--optimizer",
         type=str, default='SGD', choices=['SGD', 'Adam'],
-        help="Optimizer algorithm during backpropagation."
+        help="Optimizer algorithm during backpropagation. "
         "Defaults to Stochastic Gradient Descent"
     )
     parser.add_argument(
         "-s", "--stop_early",
         nargs='?', type=int, const=10, default=False,
-        help="Training will stop after N number of epochs"
-        "where validation stopped diminishing."
-        "Inactive by default. If flag is present,"
+        help="Training will stop after N number of epochs "
+        "where validation stopped diminishing. "
+        "Inactive by default. If flag is present, "
         "defaults to 10."
     )
     parser.add_argument(

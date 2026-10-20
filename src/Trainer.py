@@ -17,6 +17,8 @@ class Trainer:
             val_dataloader: DataLoader) -> History:
         history = History()
 
+        self.print_summary(train_dataloader, self.epochs)
+
         for epoch in range(self.epochs):
             train_loss: float = 0.0
             train_acc: float = 0.0
@@ -56,3 +58,27 @@ class Trainer:
             accuracy += compute_accuracy(y_batch, forward)
 
         return (loss / len(dataloader), accuracy / len(dataloader))
+
+    def print_summary(self, loader: DataLoader, epochs: int) -> None:
+        architecture = " -> ".join(map(str, self.model.size())) + " -> 2"
+        activation = self.model.layers[0].activation
+        optimizer = self.model.optimizer_name
+        learning_rate = self.model.layers[0].optimizer.lr
+        batch_size = loader.batch_size
+        early_stopping = (f"Active ({self.early_stop.patience} epochs)"
+                          if self.early_stop else "Inactive")
+
+        summary = (
+            f"\n{'=' * 50}\n"
+            f"{'TRAINING CONFIGURATION':^50}\n"
+            f"{'=' * 50}\n"
+            f"  • Architecture    : {architecture}\n"
+            f"  • Activation      : {activation}\n"
+            f"  • Optimizer       : {optimizer}\n"
+            f"  • Learning Rate   : {learning_rate}\n"
+            f"  • Batch Size      : {batch_size}\n"
+            f"  • Epochs          : {epochs}\n"
+            f"  • Early Stopping  : {early_stopping}\n"
+            f"{'=' * 50}\n"
+        )
+        print(summary)
