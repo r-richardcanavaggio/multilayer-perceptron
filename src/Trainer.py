@@ -32,6 +32,8 @@ class Trainer:
                 d_Z = forward_pass - np.column_stack((1 - y_batch, y_batch))
                 self.model.backward(d_Z)
 
+                self.model.update()
+
             train_loss /= len(train_dataloader)
             train_acc /= len(train_dataloader)
             val_loss, val_acc = self.evaluate(val_dataloader)

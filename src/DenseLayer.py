@@ -56,12 +56,14 @@ class DenseLayer:
     def backward(self, grad_output: Tensor) -> Tensor:
         d_Z = self._compute_activation_gradient(grad_output)
 
-        d_weights, d_biases, grad_input = self._compute_gradients(d_Z)
-
-        self.weights, self.biases = self.optimizer.update(
-            self.weights, self.biases, d_weights, d_biases)
+        self.d_weights, self.d_biases, grad_input = (
+            self._compute_gradients(d_Z))
 
         return grad_input
+
+    def update(self) -> None:
+        self.weights, self.biases = self.optimizer.update(
+            self.weights, self.biases, self.d_weights, self.d_biases)
 
     @classmethod
     def from_computed(cls, w: Tensor, b: Tensor, act: str) -> DenseLayer:

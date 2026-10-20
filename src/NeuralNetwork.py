@@ -43,6 +43,10 @@ class NeuralNetwork:
             out = layer.backward(out)
         return out
 
+    def update(self) -> None:
+        for layer in self.layers:
+            layer.update()
+
     def export(self, path: str) -> None:
         nn_dict: dict[str, Tensor | str] = {}
 
