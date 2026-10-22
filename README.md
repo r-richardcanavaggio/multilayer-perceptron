@@ -1,6 +1,6 @@
 # Multilayer Perceptron (MLP) From Scratch
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.14%2B-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![NumPy](https://img.shields.io/badge/NumPy-Vectorized-013243?style=flat&logo=numpy&logoColor=white)](https://numpy.org/)
 [![Type Checked](https://img.shields.io/badge/Mypy-Strict%20Verified-blue?style=flat)](http://mypy-lang.org/)
 [![School](https://img.shields.io/badge/42-AI%20Specialization-000000?style=flat&logo=42&logoColor=white)](https://42.fr/)
@@ -28,8 +28,13 @@ The repository is organized following modern object-oriented deep learning frame
 ### Forward / Backward Data Flow
 
 ```text
-[ Input Features X ]
+[ Raw Features X ]
          │
+         ▼
+┌──────────────────┐
+│  StandardScaler  │ ◄── Fitted strictly on X_train (μ, σ)
+└────────┬─────────┘
+         │ Normalized Tensors
          ▼
 ┌──────────────────┐
 │   DataLoader     │ ◄── Shuffled Mini-batches (B samples)
@@ -56,10 +61,11 @@ The repository is organized following modern object-oriented deep learning frame
 
 | Module | Core Role & Engineering Design |
 |:---|:---|
-| `src/Dataset.py` | Encapsulates input matrices and targets; handles indexing and dimensional validation. |
+| `src/Dataset.py` | Encapsulates input matrices and targets; parses diagnosis labels (`M`/`B` $\to 1/0$) and provides clean tensor slicing. |
+| `src/StandardScaler.py` | Pure NumPy z-score standardization ($z = \frac{x - \mu}{\sigma}$); fitted strictly on train data to eliminate data leakage. |
 | `src/DataLoader.py` | Iterable mini-batch streaming generator with random epoch shuffling (`__iter__`, `yield`). |
 | `src/DenseLayer.py` | Encapsulates layer weights $W$, biases $b$, analytical activation derivatives, and parameter updates. |
-| `src/NeuralNetwork.py` | Sequential execution container orchestrating forward propagation, reverse backpropagation, and `.npz` serialization. |
+| `src/NeuralNetwork.py` | Sequential execution container orchestrating forward propagation, reverse backpropagation, and self-contained `.npz` serialization (weights + scaler). |
 | `src/Optimizer.py` | **Strategy Pattern** with abstract `Optimizer` base class, `SGDOptimizer`, `AdamOptimizer`, and `OptimizerFactory`. |
 | `src/Trainer.py` | Decoupled training engine orchestrating the epoch loop, mini-batch updates, validation metrics, and early stopping. |
 | `src/History.py` | Strongly-typed recorder (`HistoryDict`) capturing loss, accuracy, and parameter vectors ($\theta_t$) across epochs. |
@@ -161,17 +167,24 @@ pip install -r requirements.txt
 mypy --strict src/ train.py predict.py split.py
 ```
 
-### 3. Data Preprocessing & Splitting
+### 3. Data Splitting
 
-Splits raw data (80% train, 20% test), maps diagnoses (`M` $\to 1$, `B` $\to 0$), and applies z-score standardization derived strictly from the training partition:
+Partitions the raw dataset into training (80%) and validation (20%) sets without modifying feature distributions:
 
 ```bash
-python3 split.py
+python3 split.py data/data.csv
 ```
 
-### 4. Model Training
+Outputs:
+- `data/training_data.csv` (455 rows)
+- `data/testing_data.csv` (114 rows)
 
-Train the network with configurable topologies, activation functions, optimizers, learning rates, and early stopping patience:
+### 4. Model Training & Pipeline Fitting
+
+During training:
+1. `Dataset` parses diagnoses (`M` $\to 1$, `B` $\to 0$) and extracts feature matrices.
+2. `StandardScaler` fits strictly on training features ($\mu, \sigma$) and standardizes both training and validation sets (guaranteeing zero data leakage).
+3. The trained model serializes its weights **together with the fitted scaler statistics** into a self-contained archive `data/model_weights.npz`.
 
 ```bash
 # Train using Adam optimizer with Early Stopping
@@ -181,12 +194,16 @@ python3 train.py -o Adam -l 24 24 24 -e 50 -s 10 -lR 0.01
 python3 train.py -o SGD -l 24 24 24 -e 50 -lR 0.1
 ```
 
-### 5. Prediction & Evaluation
+### 5. Prediction & Autonomous Inference
 
-Loads saved weights (`data/model_weights.npz`) and evaluates performance on unseen test data:
+`predict.py` is fully autonomous: it loads the network weights **and** its embedded `StandardScaler`. Any input CSV (whether raw, unscaled, or pre-split) is automatically scaled using the exact training distribution before inference:
 
 ```bash
+# Predict on default test set
 python3 predict.py
+
+# Or predict on any custom raw dataset
+python3 predict.py path/to/any_dataset.csv
 ```
 
 ---
