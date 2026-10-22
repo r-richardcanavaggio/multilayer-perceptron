@@ -2,6 +2,7 @@ import numpy as np
 from src.DenseLayer import DenseLayer
 from src.Optimizer import OptimizerFactory
 from src.type import Tensor
+from src.StandardScaler import StandardScaler
 
 
 class NeuralNetwork:
@@ -10,6 +11,7 @@ class NeuralNetwork:
                  activation: str, optimizer: str, **optimizer_kwargs: float):
         self.layers: list[DenseLayer] = []
         self.optimizer_name: str = optimizer
+        self.scaler: StandardScaler | None = None
 
         if not layers_sizes:
             return
@@ -47,13 +49,17 @@ class NeuralNetwork:
         for layer in self.layers:
             layer.update()
 
-    def export(self, path: str) -> None:
+    def export(self, path: str, scaler: StandardScaler | None = None) -> None:
         nn_dict: dict[str, Tensor | str] = {}
 
         for i, layer in enumerate(self.layers):
             nn_dict[f"W_{i}"] = layer.weights
             nn_dict[f"b_{i}"] = layer.biases
             nn_dict[f"A_{i}"] = layer.activation
+
+        if scaler is not None:
+            nn_dict["scaler_mean"] = scaler.mean
+            nn_dict["scaler_std"] = scaler.std
 
         try:
             np.savez(path, allow_pickle=True, **nn_dict)
@@ -71,14 +77,26 @@ class NeuralNetwork:
         loaded_layers = np.load(filename)
         layers: list[DenseLayer] = []
 
-        for i in range(len(loaded_layers) // 3):
+        num_layers = sum(1 for k in loaded_layers.files if k.startswith("W_"))
+
+        for i in range(num_layers):
             weights = loaded_layers[f"W_{i}"]
             biases = loaded_layers[f"b_{i}"]
             activation = loaded_layers[f"A_{i}"]
             layer = DenseLayer.from_computed(weights, biases, activation)
             layers.append(layer)
+
         instance = cls(0, [], 0, "", "")
         instance.layers = layers
+
+        if "scaler_mean" in loaded_layers and "scaler_std" in loaded_layers:
+            scaler = StandardScaler()
+            scaler.mean = loaded_layers["scaler_mean"]
+            scaler.std = loaded_layers["scaler_std"]
+            instance.scaler = scaler
+        else:
+            instance.scaler = None
+
         return instance
 
     def get_weights_vector(self) -> Tensor:

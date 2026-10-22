@@ -1,4 +1,3 @@
-import numpy as np
 from src.parser import init_parser
 from src.NeuralNetwork import NeuralNetwork
 from src.EarlyStopping import EarlyStopping
@@ -6,16 +5,21 @@ from src.Dataset import Dataset
 from src.DataLoader import DataLoader
 from src.Trainer import Trainer
 from src.LossLandscape import LossLandscape
+from src.StandardScaler import StandardScaler
 import pandas
 
 
 def main() -> None:
-    # np.random.seed(42)
-
     args = init_parser()
 
     train_data = Dataset('data/training_data.csv')
     val_data = Dataset('data/testing_data.csv')
+
+    scaler = StandardScaler()
+    scaler.fit(train_data.parameters)
+
+    train_data.normalize(scaler)
+    val_data.normalize(scaler)
 
     train_loader = DataLoader(train_data,
                               batch_size=args.batch_size, shuffle=True)
@@ -44,7 +48,7 @@ def main() -> None:
 
     history.plot_loss()
     history.plot_acc()
-    model.export('data/model_weights.npz')
+    model.export('data/model_weights.npz', scaler=scaler)
     pandas.DataFrame(history.history).to_csv('history.csv')
 
 
