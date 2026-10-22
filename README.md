@@ -236,45 +236,77 @@ python3 predict.py path/to/any_dataset.csv
 ### Model Training Execution (`train.py`)
 
 ```text
-$ python3 train.py -o Adam -e 50 -s 10 -lR 0.01
+$ python3 train.py -l 32 16 -o Adam -s
 Successfully loaded data in data/training_data.csv
 Successfully loaded data in data/testing_data.csv
-Epoch 1: Training loss = 0.53218571 | Validation loss = 0.15417870
-Epoch 2: Training loss = 0.12117479 | Validation loss = 0.06284457
-Epoch 3: Training loss = 0.08656392 | Validation loss = 0.09342783
-Epoch 4: Training loss = 0.07894161 | Validation loss = 0.07438113
-Epoch 5: Training loss = 0.07239458 | Validation loss = 0.05860561
-Epoch 6: Training loss = 0.06764356 | Validation loss = 0.05787028
-Epoch 7: Training loss = 0.07538802 | Validation loss = 0.04441908
-Epoch 8: Training loss = 0.07494354 | Validation loss = 0.06011735
-Epoch 9: Training loss = 0.06347635 | Validation loss = 0.25850142
-Epoch 10: Training loss = 0.06515142 | Validation loss = 0.19916024
-Epoch 11: Training loss = 0.06039511 | Validation loss = 0.08689131
-Epoch 12: Training loss = 0.07120848 | Validation loss = 0.04860856
-Epoch 13: Training loss = 0.07917582 | Validation loss = 0.21246300
-Epoch 14: Training loss = 0.07266126 | Validation loss = 0.20677901
-Epoch 15: Training loss = 0.05801347 | Validation loss = 0.09039113
-Epoch 16: Training loss = 0.05927256 | Validation loss = 0.18160378
-Epoch 17: Training loss = 0.05709562 | Validation loss = 0.14260090
-Epoch 18: Training loss = 0.05863500 | Validation loss = 0.20152522
+
+==================================================
+              TRAINING CONFIGURATION              
+==================================================
+  • Architecture    : 30 -> 32 -> 16 -> 2
+  • Activation      : sigmoid
+  • Optimizer       : Adam
+  • Learning Rate   : 0.001
+  • Batch Size      : 8
+  • Epochs          : 84
+  • Early Stopping  : Active (10 epochs)
+==================================================
+
+Epoch 1: Training loss = 0.69911511 | Validation loss = 0.60439975
+Epoch 2: Training loss = 0.60479377 | Validation loss = 0.49778310
+Epoch 3: Training loss = 0.51567713 | Validation loss = 0.40568239
+Epoch 4: Training loss = 0.41704107 | Validation loss = 0.31848358
+Epoch 5: Training loss = 0.32724802 | Validation loss = 0.25091454
+Epoch 6: Training loss = 0.25776963 | Validation loss = 0.19874236
+Epoch 7: Training loss = 0.20764028 | Validation loss = 0.16607827
+Epoch 8: Training loss = 0.17067072 | Validation loss = 0.14355692
+Epoch 9: Training loss = 0.14503694 | Validation loss = 0.12521019
+Epoch 10: Training loss = 0.12669295 | Validation loss = 0.11080716
+Epoch 11: Training loss = 0.11362687 | Validation loss = 0.10234483
+Epoch 12: Training loss = 0.10216269 | Validation loss = 0.09634969
+Epoch 13: Training loss = 0.09447541 | Validation loss = 0.08943973
+Epoch 14: Training loss = 0.08783907 | Validation loss = 0.08560304
+Epoch 15: Training loss = 0.08392423 | Validation loss = 0.08567876
+Epoch 16: Training loss = 0.07942964 | Validation loss = 0.08154868
+Epoch 17: Training loss = 0.07666506 | Validation loss = 0.07920029
+Epoch 18: Training loss = 0.07294234 | Validation loss = 0.07785241
+Epoch 19: Training loss = 0.07060039 | Validation loss = 0.07431325
+Epoch 20: Training loss = 0.06809179 | Validation loss = 0.07379666
+Epoch 21: Training loss = 0.06667174 | Validation loss = 0.07139236
+Epoch 22: Training loss = 0.06527077 | Validation loss = 0.07583534
+Epoch 23: Training loss = 0.06362491 | Validation loss = 0.07168299
+Epoch 24: Training loss = 0.06257514 | Validation loss = 0.07203743
+Epoch 25: Training loss = 0.06312943 | Validation loss = 0.06820544
+Epoch 26: Training loss = 0.06065634 | Validation loss = 0.07707474
+Epoch 27: Training loss = 0.06013281 | Validation loss = 0.07821340
+Epoch 28: Training loss = 0.06135813 | Validation loss = 0.07262460
+Epoch 29: Training loss = 0.05827274 | Validation loss = 0.07378880
+Epoch 30: Training loss = 0.05695599 | Validation loss = 0.07260518
+Epoch 31: Training loss = 0.05647357 | Validation loss = 0.07332870
+Epoch 32: Training loss = 0.05782145 | Validation loss = 0.07065163
+Epoch 33: Training loss = 0.05533206 | Validation loss = 0.08461256
+Epoch 34: Training loss = 0.05501747 | Validation loss = 0.07539299
+Epoch 35: Training loss = 0.05591688 | Validation loss = 0.07595274
+Epoch 36: Training loss = 0.05389456 | Validation loss = 0.08348351
 Model saved succesfully in data/model_weights.npz
 ```
-*Note: Training terminated automatically at epoch 18 due to Early Stopping regularization after validation loss reached its optimum at epoch 7.*
+*Note: Training terminated automatically at epoch 36 due to Early Stopping regularization after validation loss reached its optimum at epoch 25.*
 
 ### Evaluation & Confusion Matrix (`predict.py`)
 
 ```text
 $ python3 predict.py
-Binary cross-entropy loss: 0.11147211665439706
+Successfully loaded data in data/testing_data.csv
+Binary cross-entropy loss: 0.0875803148682895
 
                   Predicted Positives  Predicted Negatives
 Actual Positives                   26                    0
 Actual Negatives                    4                   84
 
-Accuracy: 96.49%
-Precision: 86.67%
-Recall: 100.00%
-F1 Score: 92.86%
+Accuracy  : 96.49%
+Precision : 86.67%
+Recall    : 100.00%
+F1 Score  : 92.86%
 ```
 
 > **Clinical Relevance**: In medical diagnostics (cancer detection), **Recall is the critical metric**. A Recall of **100.00%** indicates zero false negatives (all malignant cases correctly identified).
