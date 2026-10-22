@@ -32,29 +32,52 @@ The repository is organized following modern object-oriented deep learning frame
          │
          ▼
 ┌──────────────────┐
-│  StandardScaler  │ ◄── Fitted strictly on X_train (μ, σ)
-└────────┬─────────┘
-         │ Normalized Tensors
-         ▼
-┌──────────────────┐
-│   DataLoader     │ ◄── Shuffled Mini-batches (B samples)
+│  StandardScaler  │ ◄── fit on X_train (μ, σ)
 └────────┬─────────┘
          │
          ▼
-┌──────────────────┐      Forward Pass: Z = X·W + b, A = σ(Z)
-│    DenseLayer    ├────────────────────────────────────────────┐
-└────────▲─────────┘                                            │
-         │                Backward Pass: dX = dZ·Wᵀ             ▼
-         │             ◄───────────────────────────      ┌──────────────┐
-         │                                               │ DenseLayer   │
-         │                                               │ (Output)     │
-         │                                               └──────┬───────┘
-         │                                                      │ A_out
-         │                                                      ▼
-┌────────┴─────────┐                                     ┌──────────────┐
-│  Optimizer (ABC) │ ◄── Updates: W -= α·ΔW, b -= α·Δb   │ Trainer      │
-│  (SGD / Adam)    │                                     │ (Loss / BCE) │
-└──────────────────┘                                     └──────────────┘
+┌──────────────────┐
+│    DataLoader    │ ◄── Shuffled Mini-batches
+└────────┬─────────┘
+         │
+ ════════╪═══════════════  FORWARD  ════════════════
+         │
+         ▼
+┌──────────────────┐
+│  DenseLayer (H)  │  Z = X·W + b,  A = σ(Z)
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ DenseLayer (Out) │  Z = A·W + b,  Ŷ = softmax(Z)
+└────────┬─────────┘
+         │
+ ════════╪═══════════════  LOSS  ═══════════════════
+         │
+         ▼
+┌──────────────────┐
+│     Trainer      │  Loss = BCE(Y, Ŷ)  →  dZ = Ŷ - Y
+└────────┬─────────┘
+         │ dZ
+ ════════╪═══════════════  BACKWARD  ═══════════════
+         │
+         ▼
+┌──────────────────┐
+│ DenseLayer (Out) │  dW, db = ∇L  →  return d_Prev
+└────────┬─────────┘
+         │ d_Prev
+         ▼
+┌──────────────────┐
+│  DenseLayer (H)  │  dW, db = ∇L  →  return d_Prev
+└────────┬─────────┘
+         │
+ ════════╪═══════════════  UPDATE  ═════════════════
+         │
+         ▼
+┌──────────────────┐
+│ Optimizer (ABC)  │  W -= α·dW,  b -= α·db
+│  (SGD / Adam)    │  Applied to every layer
+└──────────────────┘
 ```
 
 ### Component Breakdown
